@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthCheckRouteImport } from './routes/auth-check'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/callback': typeof CallbackRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/callback': typeof CallbackRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/callback': typeof CallbackRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth-check' | '/callback' | '/dashboard' | '/signin'
+  fullPaths:
+    | '/'
+    | '/auth-check'
+    | '/callback'
+    | '/dashboard'
+    | '/signin'
+    | '/templates'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth-check' | '/callback' | '/dashboard' | '/signin'
-  id: '__root__' | '/' | '/auth-check' | '/callback' | '/dashboard' | '/signin'
+  to:
+    | '/'
+    | '/auth-check'
+    | '/callback'
+    | '/dashboard'
+    | '/signin'
+    | '/templates'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth-check'
+    | '/callback'
+    | '/dashboard'
+    | '/signin'
+    | '/templates'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +105,18 @@ export interface RootRouteChildren {
   CallbackRoute: typeof CallbackRoute
   DashboardRoute: typeof DashboardRoute
   SigninRoute: typeof SigninRoute
+  TemplatesRoute: typeof TemplatesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signin': {
       id: '/signin'
       path: '/signin'
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   CallbackRoute: CallbackRoute,
   DashboardRoute: DashboardRoute,
   SigninRoute: SigninRoute,
+  TemplatesRoute: TemplatesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
