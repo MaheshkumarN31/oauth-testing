@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { DocsColumns } from './core/DocsColumns'
 import TanStackTable from './core/TanstackTable'
 import {
@@ -12,8 +12,30 @@ import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { FolderOpen, Search, Plus, AlertCircle } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+    FolderOpen,
+    Search,
+    Plus,
+    AlertCircle,
+    Upload,
+    FileText,
+    X,
+    CloudUpload,
+    File,
+    CheckCircle2,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export interface Workspace {
     _id: string
@@ -40,6 +62,11 @@ const Templates = () => {
     )
     const [pageIndex, setPageIndex] = useState(0)
     const [pageSize, setPageSize] = useState(10)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [templateName, setTemplateName] = useState('')
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+    const [isDragging, setIsDragging] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     const {
         data: workspaces,
@@ -105,6 +132,100 @@ const Templates = () => {
         }
     }, [workspaces])
 
+    // File handling functions - Multiple files support
+    const handleFilesSelect = useCallback((files: FileList | File[]) => {
+        const fileArray = Array.from(files)
+        const pdfFiles = fileArray.filter(
+            (file) => file.type === 'application/pdf' || file.name.endsWith('.pdf'),
+        )
+
+        if (pdfFiles.length !== fileArray.length) {
+            alert('Some files were skipped. Only PDF files are allowed.')
+        }
+
+        if (pdfFiles.length > 0) {
+            setSelectedFiles((prev) => [...prev, ...pdfFiles])
+        }
+    }, [])
+
+    const handleDragOver = useCallback((e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(true)
+    }, [])
+
+    const handleDragLeave = useCallback((e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(false)
+    }, [])
+
+    const handleDrop = useCallback(
+        (e: React.DragEvent) => {
+            e.preventDefault()
+            setIsDragging(false)
+            const files = e.dataTransfer.files
+            if (files.length > 0) {
+                handleFilesSelect(files)
+            }
+        },
+        [handleFilesSelect],
+    )
+
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files
+        if (files && files.length > 0) {
+            handleFilesSelect(files)
+        }
+        // Reset input so same files can be selected again
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
+
+    const removeFile = (index: number) => {
+        setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
+    }
+
+    const removeAllFiles = () => {
+        setSelectedFiles([])
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
+
+    const handleCreateTemplate = () => {
+        if (!templateName.trim()) {
+            alert('Please enter a template name')
+            return
+        }
+        if (selectedFiles.length === 0) {
+            alert('Please upload at least one file')
+            return
+        }
+        // TODO: Implement actual template creation API call
+        console.log('Creating template:', { name: templateName, files: selectedFiles })
+        setIsDialogOpen(false)
+        setTemplateName('')
+        setSelectedFiles([])
+    }
+
+    const resetDialog = () => {
+        setTemplateName('')
+        setSelectedFiles([])
+    }
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes'
+        const k = 1024
+        const sizes = ['Bytes', 'KB', 'MB', 'GB']
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    }
+
+    const getTotalSize = () => {
+        const total = selectedFiles.reduce((acc, file) => acc + file.size, 0)
+        return formatFileSize(total)
+    }
+
     if (isLoading) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -163,10 +284,200 @@ const Templates = () => {
                                 className="w-64 pl-8 h-9 bg-muted/50 border-0 focus-visible:ring-1"
                             />
                         </div>
-                        <Button className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-                            <Plus className="h-4 w-4" />
-                            Create New Template
-                        </Button>
+
+                        {/* Create Template Dialog */}
+                        <Dialog
+                            open={isDialogOpen}
+                            onOpenChange={(open) => {
+                                setIsDialogOpen(open)
+                                if (!open) resetDialog()
+                            }}
+                        >
+                            <DialogTrigger asChild>
+                                <Button className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+                                    <Plus className="h-4 w-4" />
+                                    Create New Template
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden flex flex-col">
+                                <DialogHeader>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600">
+                                            <FileText className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <DialogTitle className="text-xl">
+                                                Create New Template
+                                            </DialogTitle>
+                                            <DialogDescription>
+                                                Upload PDF files to create a new document template
+                                            </DialogDescription>
+                                        </div>
+                                    </div>
+                                </DialogHeader>
+
+                                <div className="space-y-6 py-4 flex-1 overflow-auto">
+                                    {/* Template Name Input */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="templateName" className="text-sm font-medium">
+                                            Template Name
+                                        </Label>
+                                        <Input
+                                            id="templateName"
+                                            placeholder="Enter template name..."
+                                            value={templateName}
+                                            onChange={(e) => setTemplateName(e.target.value)}
+                                            className="h-11"
+                                        />
+                                    </div>
+
+                                    {/* File Upload Area */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-sm font-medium">Upload Files</Label>
+                                            {selectedFiles.length > 0 && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    {selectedFiles.length} file(s) • {getTotalSize()}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Dropzone */}
+                                        <div
+                                            onDragOver={handleDragOver}
+                                            onDragLeave={handleDragLeave}
+                                            onDrop={handleDrop}
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className={cn(
+                                                'relative cursor-pointer rounded-xl border-2 border-dashed p-6 transition-all duration-200',
+                                                isDragging
+                                                    ? 'border-indigo-500 bg-indigo-500/5'
+                                                    : 'border-muted-foreground/25 hover:border-indigo-500/50 hover:bg-muted/50',
+                                            )}
+                                        >
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept=".pdf"
+                                                multiple
+                                                onChange={handleFileInputChange}
+                                                className="hidden"
+                                            />
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div
+                                                    className={cn(
+                                                        'flex h-14 w-14 items-center justify-center rounded-full transition-all',
+                                                        isDragging ? 'bg-indigo-500/10' : 'bg-muted',
+                                                    )}
+                                                >
+                                                    <CloudUpload
+                                                        className={cn(
+                                                            'h-7 w-7 transition-colors',
+                                                            isDragging
+                                                                ? 'text-indigo-500'
+                                                                : 'text-muted-foreground',
+                                                        )}
+                                                    />
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-sm font-medium">
+                                                        <span className="text-indigo-500">Click to upload</span>{' '}
+                                                        or drag and drop
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        PDF files only • Multiple files supported
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Selected Files List */}
+                                        {selectedFiles.length > 0 && (
+                                            <div className="space-y-2 mt-4">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-medium text-muted-foreground">
+                                                        Selected Files
+                                                    </span>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-7 text-xs text-destructive hover:text-destructive"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            removeAllFiles()
+                                                        }}
+                                                    >
+                                                        Remove All
+                                                    </Button>
+                                                </div>
+                                                <div className="space-y-2 max-h-[200px] overflow-auto pr-1">
+                                                    {selectedFiles.map((file, index) => (
+                                                        <div
+                                                            key={`${file.name}-${index}`}
+                                                            className="flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3"
+                                                        >
+                                                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-500/10 to-red-600/10 border border-red-500/20 shrink-0">
+                                                                <File className="h-5 w-5 text-red-500" />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm font-medium truncate">
+                                                                    {file.name}
+                                                                </p>
+                                                                <div className="flex items-center gap-2 mt-0.5">
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        {formatFileSize(file.size)}
+                                                                    </span>
+                                                                    <span className="flex items-center gap-1 text-xs text-emerald-600">
+                                                                        <CheckCircle2 className="h-3 w-3" />
+                                                                        Ready
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    removeFile(index)
+                                                                }}
+                                                            >
+                                                                <X className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setIsDialogOpen(false)
+                                            resetDialog()
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleCreateTemplate}
+                                        disabled={!templateName.trim() || selectedFiles.length === 0}
+                                        className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                                    >
+                                        <Upload className="h-4 w-4" />
+                                        Create Template
+                                        {selectedFiles.length > 0 && (
+                                            <Badge variant="secondary" className="ml-1 bg-white/20 text-white">
+                                                {selectedFiles.length}
+                                            </Badge>
+                                        )}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </header>
 

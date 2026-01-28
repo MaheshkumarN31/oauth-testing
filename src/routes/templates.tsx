@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
+import Templates from '@/components/templates'
 
 export const Route = createFileRoute('/templates')({
-  component: RouteComponent,
+    validateSearch: z.object({
+        user_id: z.string(),
+    }),
+    component: Templates,
 })
-
-function RouteComponent() {
-  return <div>Hello "/templates"!</div>
-}
