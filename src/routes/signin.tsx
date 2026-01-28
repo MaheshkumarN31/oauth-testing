@@ -13,12 +13,7 @@ function SignIn() {
   const scope = import.meta.env.VITE_OAUTH_SCOPE
   const state = import.meta.env.VITE_OAUTH_STATE
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['getOauthUrl'],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -29,7 +24,9 @@ function SignIn() {
         state: state,
       })
 
-      const res = await fetch(`https://v2-dev-api.esigns.io/v1.0/oauth/authorize?${params.toString()}`)
+      const res = await fetch(
+        `https://v2-dev-api.esigns.io/v1.0/oauth/authorize?${params.toString()}`,
+      )
       if (!res.ok) throw new Error('Failed to fetch OAuth URL')
       return res.json()
     },
@@ -38,13 +35,15 @@ function SignIn() {
 
   // Redirect if backend gave a URL
   if (data?.url) {
-   window.location.href = data.url
+    window.location.href = data.url
   }
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-gray-100">
       <div className="bg-white shadow-md rounded-2xl px-10 py-12 w-full max-w-md text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Welcome to Esigns</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          Welcome to Esigns
+        </h1>
 
         {isError && (
           <p className="text-red-600 mb-4">❌ Failed to get auth URL</p>

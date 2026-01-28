@@ -17,20 +17,36 @@ function CallbackPage() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['oauth-token', code],
     queryFn: async () => {
+      const clientId = import.meta.env.VITE_OAUTH_CLIENT_ID
+      const clientSecret = import.meta.env.VITE_OAUTH_CLIENT_SECRET
+      const redirectUri = import.meta.env.VITE_OAUTH_REDIRECT_URI
+
+      const payload = new URLSearchParams({
+        code: code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      })
       const response = await fetch(
-        `https://esigns-app.onrender.com/v1.0/oauth/token?redirect_uri=${import.meta.env.VITE_OAUTH_REDIRECT_URI}&code=${code}`,
+        `https://v2-dev-api.esigns.io/v1.0/oauth/token`,
         {
-          method: 'GET',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: payload,
         },
       )
 
       const data = await response.json()
+      console.log({ data })
+      return data
+      // if (!response.ok) {
+      //   throw new Error(data.error_description || 'Token exchange failed')
+      // }
 
-      if (!response.ok) {
-        throw new Error(data.error_description || 'Token exchange failed')
-      }
-
-      return data?.data
+      // return data?.data
     },
     enabled: !!code,
     refetchOnWindowFocus: false,
@@ -55,8 +71,7 @@ function CallbackPage() {
 
   useEffect(() => {
     if (isError) {
-    navigate({ to: '/signin', replace: true })
- 
+      navigate({ to: '/signin', replace: true })
     }
   }, [isError, error])
 
