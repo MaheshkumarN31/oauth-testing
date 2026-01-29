@@ -106,7 +106,7 @@ export function CreateTemplateDialog({ companyId, userId }: CreateTemplateDialog
                     template_name: templateName,
                     doc_paths: JSON.stringify(doc_paths),
                 })
-                window.location.href = `/templates_/add-recipients?${searchParams.toString()}`
+                window.location.href = `/templates/add-recipients?${searchParams.toString()}`
             } else {
                 const failedCount = selectedFiles.length - successfulUploads.length
                 alert(`${failedCount} file(s) failed to upload. Please try again.`)
