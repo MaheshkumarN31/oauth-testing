@@ -1,7 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { z } from 'zod'
+import { exchangeToken } from '@/services/api'
+import { LoadingSpinner } from '@/components/common'
 
 export const Route = createFileRoute('/callback')({
   validateSearch: z.object({
@@ -14,55 +16,20 @@ function CallbackPage() {
   const { code } = Route.useSearch()
   const navigate = useNavigate()
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['oauth-token', code],
-    queryFn: async () => {
-      const clientId = import.meta.env.VITE_OAUTH_CLIENT_ID
-      const clientSecret = import.meta.env.VITE_OAUTH_CLIENT_SECRET
-      const redirectUri = import.meta.env.VITE_OAUTH_REDIRECT_URI
-
-      const payload = new URLSearchParams({
-        code: code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code',
-      })
-      const response = await fetch(
-        `${import.meta.env.VITE_PUBLIC_URL}/oauth/token`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: payload,
-        },
-      )
-
-      const data = await response.json()
-      console.log({ data })
-      return data
-      // if (!response.ok) {
-      //   throw new Error(data.error_description || 'Token exchange failed')
-      // }
-
-      // return data?.data
-    },
+    queryFn: () => exchangeToken(code),
     enabled: !!code,
     refetchOnWindowFocus: false,
   })
 
-  console.log(data)
-
   useEffect(() => {
-    if (data) {
-      localStorage.setItem('access_token', data.accessToken)
+    if (data?.accessToken) {
       console.log('✅ Token saved:', data.accessToken)
-
       setTimeout(() => {
         navigate({
           to: '/dashboard',
-          search: { user_id: data?.user?._id },
+          search: { user_id: data?.user?._id || '' },
           replace: true,
         })
       }, 1000)
@@ -73,15 +40,17 @@ function CallbackPage() {
     if (isError) {
       navigate({ to: '/signin', replace: true })
     }
-  }, [isError, error])
+  }, [isError, navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white text-gray-800 text-xl font-semibold">
-      {isLoading
-        ? '🔄 Redirecting...'
-        : isError
-          ? '❌ Error occurred'
-          : '✅ Redirecting...'}
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      {isLoading ? (
+        <LoadingSpinner message="🔄 Authenticating..." />
+      ) : isError ? (
+        <p className="text-red-600 text-xl font-semibold">❌ Error occurred</p>
+      ) : (
+        <LoadingSpinner message="✅ Redirecting..." />
+      )}
     </div>
   )
 }
