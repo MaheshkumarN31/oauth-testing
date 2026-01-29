@@ -13,14 +13,14 @@ import {
   Upload,
   X,
 } from 'lucide-react'
-import { DocsColumns } from './core/DocsColumns'
-import TanStackTable from './core/TanstackTable'
+import { DocsColumns } from '../core/DocsColumns'
+import TanStackTable from '../core/TanstackTable'
 import {
   AppSidebar,
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from './layout/AppSidebar'
+} from '../layout/AppSidebar'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

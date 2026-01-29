@@ -197,10 +197,10 @@ export function AppSidebar({
       path: '/templates',
     },
     {
-      title: 'Team',
+      title: 'Contacts',
       icon: Users,
       href: '#',
-      path: '/team',
+      path: '/contacts',
     },
     {
       title: 'Analytics',
