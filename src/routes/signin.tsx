@@ -1,4 +1,3 @@
-// src/routes/signin.tsx
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 
@@ -25,7 +24,7 @@ function SignIn() {
       })
 
       const res = await fetch(
-        `https://v2-dev-api.esigns.io/v1.0/oauth/authorize?${params.toString()}`,
+        `${import.meta.env.VITE_PUBLIC_URL}/oauth/authorize?${params.toString()}`,
       )
       if (!res.ok) throw new Error('Failed to fetch OAuth URL')
       return res.json()
@@ -33,7 +32,6 @@ function SignIn() {
     enabled: false,
   })
 
-  // Redirect if backend gave a URL
   if (data?.url) {
     window.location.href = data.url
   }

@@ -29,7 +29,7 @@ function CallbackPage() {
         grant_type: 'authorization_code',
       })
       const response = await fetch(
-        `https://v2-dev-api.esigns.io/v1.0/oauth/token`,
+        `${import.meta.env.VITE_PUBLIC_URL}/oauth/token`,
         {
           method: 'POST',
           headers: {

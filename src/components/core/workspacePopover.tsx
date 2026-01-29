@@ -1,24 +1,28 @@
+import { Building2, Check, ChevronsUpDown } from 'lucide-react'
+import { useState } from 'react'
+import type { Workspace } from '../dashboard'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { Check, ChevronsUpDown, Building2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useState } from "react"
-import type { Workspace } from "../dashboard"
-import { Badge } from "@/components/ui/badge"
-
+} from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/components/ui/command'
+import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 
 type WorkspaceComboBoxProps = {
-  allWorkspaces: Workspace[]
+  allWorkspaces: Array<Workspace>
   selectedWorkspace: Workspace | null
   setSelectedWorkspace: (workspace: Workspace) => void
 }
 
-// Original combobox for backward compatibility
 export function WorkspaceComboBox({
   allWorkspaces,
   selectedWorkspace,
@@ -35,7 +39,7 @@ export function WorkspaceComboBox({
           aria-expanded={open}
           className="w-[250px] justify-between"
         >
-          {selectedWorkspace ? selectedWorkspace.name : "Select workspace"}
+          {selectedWorkspace ? selectedWorkspace.name : 'Select workspace'}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -56,10 +60,10 @@ export function WorkspaceComboBox({
               >
                 <Check
                   className={cn(
-                    "mr-2 h-4 w-4",
+                    'mr-2 h-4 w-4',
                     selectedWorkspace?._id === workspace._id
-                      ? "opacity-100"
-                      : "opacity-0"
+                      ? 'opacity-100'
+                      : 'opacity-0',
                   )}
                 />
                 {workspace.name}
@@ -72,7 +76,6 @@ export function WorkspaceComboBox({
   )
 }
 
-// Enhanced sidebar version with better styling
 export function WorkspaceSidebarSelector({
   allWorkspaces,
   selectedWorkspace,
@@ -96,7 +99,7 @@ export function WorkspaceSidebarSelector({
             <div className="flex flex-col items-start">
               <span className="text-xs text-muted-foreground">Workspace</span>
               <span className="text-sm font-medium truncate max-w-[140px]">
-                {selectedWorkspace?.name || "Select..."}
+                {selectedWorkspace?.name || 'Select...'}
               </span>
             </div>
           </div>
@@ -123,13 +126,21 @@ export function WorkspaceSidebarSelector({
                   <Building2 className="h-4 w-4 text-indigo-500" />
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className="text-sm font-medium truncate">{workspace.name}</span>
+                  <span className="text-sm font-medium truncate">
+                    {workspace.name}
+                  </span>
                   <div className="flex items-center gap-1">
-                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">
-                      {workspace.type || "Workspace"}
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] px-1 py-0 h-4"
+                    >
+                      {workspace.type || 'Workspace'}
                     </Badge>
                     {workspace.is_owner && (
-                      <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-indigo-500/50 text-indigo-600">
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] px-1 py-0 h-4 border-indigo-500/50 text-indigo-600"
+                      >
                         Owner
                       </Badge>
                     )}
@@ -137,10 +148,10 @@ export function WorkspaceSidebarSelector({
                 </div>
                 <Check
                   className={cn(
-                    "h-4 w-4 shrink-0",
+                    'h-4 w-4 shrink-0',
                     selectedWorkspace?._id === workspace._id
-                      ? "opacity-100 text-indigo-600"
-                      : "opacity-0"
+                      ? 'opacity-100 text-indigo-600'
+                      : 'opacity-0',
                   )}
                 />
               </CommandItem>

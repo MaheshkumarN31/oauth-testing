@@ -1,32 +1,32 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from '@tanstack/react-table'
+import { useState } from 'react'
+import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useState } from "react";
-import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
+} from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface TanStackTableProps {
-  data: any[];
-  columns: any[];
-  pageIndex: number;
-  pageSize: number;
-  pageCount?: number;
-  totalCount?: number;
-  onPageChange: (newPageIndex: number) => void;
-  onPageSizeChange: (newPageSize: number) => void;
-  loading?: boolean;
+  data: Array<any>
+  columns: Array<any>
+  pageIndex: number
+  pageSize: number
+  pageCount?: number
+  totalCount?: number
+  onPageChange: (newPageIndex: number) => void
+  onPageSizeChange: (newPageSize: number) => void
+  loading?: boolean
 }
 
 export default function TanStackTable({
@@ -40,7 +40,7 @@ export default function TanStackTable({
   onPageSizeChange,
   loading = false,
 }: TanStackTableProps) {
-  const [gotoPage, setGotoPage] = useState("");
+  const [gotoPage, setGotoPage] = useState('')
 
   const table = useReactTable({
     data,
@@ -54,15 +54,15 @@ export default function TanStackTable({
     },
     onPaginationChange: (updater) => {
       const newState =
-        typeof updater === "function"
+        typeof updater === 'function'
           ? updater({ pageIndex, pageSize })
-          : updater;
-      onPageChange(newState.pageIndex);
+          : updater
+      onPageChange(newState.pageIndex)
     },
     manualPagination: true,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-  });
+  })
 
   // Loading skeleton rows
   const renderLoadingRows = () => {
@@ -77,22 +77,21 @@ export default function TanStackTable({
           </td>
         ))}
       </tr>
-    ));
-  };
+    ))
+  }
 
   // Empty state
   const renderEmptyState = () => (
     <tr>
-      <td
-        colSpan={columns.length + 1}
-        className="text-center py-16"
-      >
+      <td colSpan={columns.length + 1} className="text-center py-16">
         <div className="flex flex-col items-center gap-3">
           <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
             <FileText className="h-6 w-6 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">No documents found</p>
+            <p className="text-sm font-medium text-foreground">
+              No documents found
+            </p>
             <p className="text-sm text-muted-foreground">
               Create a new document to get started
             </p>
@@ -100,7 +99,7 @@ export default function TanStackTable({
         </div>
       </td>
     </tr>
-  );
+  )
 
   return (
     <div className="flex flex-col">
@@ -109,7 +108,10 @@ export default function TanStackTable({
         <table className="min-w-full">
           <thead className="sticky top-0 z-10">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="bg-muted/50 border-y border-border">
+              <tr
+                key={headerGroup.id}
+                className="bg-muted/50 border-y border-border"
+              >
                 {/* S.No header */}
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-16">
                   #
@@ -121,7 +123,7 @@ export default function TanStackTable({
                   >
                     {flexRender(
                       header.column.columnDef.header,
-                      header.getContext()
+                      header.getContext(),
                     )}
                   </th>
                 ))}
@@ -130,35 +132,30 @@ export default function TanStackTable({
           </thead>
 
           <tbody className="divide-y divide-border">
-            {loading ? (
-              renderLoadingRows()
-            ) : data?.length === 0 ? (
-              renderEmptyState()
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="group transition-colors hover:bg-muted/50"
-                >
-                  {/* S.No cell */}
-                  <td className="px-4 py-3 text-sm text-muted-foreground font-medium">
-                    {pageIndex * pageSize + row.index + 1}
-                  </td>
-
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="px-4 py-3 text-sm"
+            {loading
+              ? renderLoadingRows()
+              : data.length === 0
+                ? renderEmptyState()
+                : table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="group transition-colors hover:bg-muted/50"
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
+                      {/* S.No cell */}
+                      <td className="px-4 py-3 text-sm text-muted-foreground font-medium">
+                        {pageIndex * pageSize + row.index + 1}
+                      </td>
+
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className="px-4 py-3 text-sm">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </tr>
-              ))
-            )}
           </tbody>
         </table>
       </div>
@@ -167,16 +164,16 @@ export default function TanStackTable({
       <div className="border-t bg-muted/30 px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* Total Count Info */}
         <div className="text-sm text-muted-foreground order-3 md:order-1">
-          Showing{" "}
+          Showing{' '}
           <span className="font-medium text-foreground">
             {data.length === 0 ? 0 : pageIndex * pageSize + 1}
-          </span>{" "}
-          to{" "}
+          </span>{' '}
+          to{' '}
           <span className="font-medium text-foreground">
             {Math.min((pageIndex + 1) * pageSize, totalCount)}
-          </span>{" "}
-          of{" "}
-          <span className="font-medium text-foreground">{totalCount}</span> results
+          </span>{' '}
+          of <span className="font-medium text-foreground">{totalCount}</span>{' '}
+          results
         </div>
 
         {/* Pagination Controls */}
@@ -228,14 +225,14 @@ export default function TanStackTable({
               size="sm"
               className="h-8"
               onClick={() => {
-                const page = parseInt(gotoPage, 10) - 1;
+                const page = parseInt(gotoPage, 10) - 1
                 if (
                   !isNaN(page) &&
                   page >= 0 &&
                   page < (pageCount ?? Infinity)
                 ) {
-                  onPageChange(page);
-                  setGotoPage("");
+                  onPageChange(page)
+                  setGotoPage('')
                 }
               }}
             >
@@ -245,12 +242,14 @@ export default function TanStackTable({
 
           {/* Rows per page */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden sm:inline">Rows:</span>
+            <span className="text-sm text-muted-foreground hidden sm:inline">
+              Rows:
+            </span>
             <Select
               value={String(pageSize)}
               onValueChange={(value) => {
-                onPageSizeChange(Number(value));
-                setGotoPage("");
+                onPageSizeChange(Number(value))
+                setGotoPage('')
               }}
             >
               <SelectTrigger className="w-[70px] h-8 text-sm">
@@ -268,5 +267,5 @@ export default function TanStackTable({
         </div>
       </div>
     </div>
-  );
+  )
 }

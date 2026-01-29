@@ -7,7 +7,9 @@ export const Route = createFileRoute('/auth-check')({
 
 function AuthCheckPage() {
   const navigate = useNavigate()
-  const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>('loading')
+  const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>(
+    'loading',
+  )
 
   useEffect(() => {
     const validateAccessToken = async () => {
@@ -19,12 +21,15 @@ function AuthCheckPage() {
       }
 
       try {
-        const res = await fetch('https://v2-dev-api.esigns.io/v1.0/oauth/protected', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const res = await fetch(
+          `${import.meta.env.VITE_PUBLIC_URL}/oauth/protected1`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        })
+        )
 
         if (!res.ok) throw new Error('Token invalid or expired')
 
@@ -32,9 +37,6 @@ function AuthCheckPage() {
         console.log('✅ Token valid, user:', user)
 
         setStatus('valid')
-
-        // Optionally redirect to dashboard or protected route
-        // navigate({ to: '/dashboard', replace: true })
       } catch (err) {
         console.error('❌ Token validation failed:', err)
         setStatus('invalid')

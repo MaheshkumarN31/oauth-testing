@@ -1,4 +1,19 @@
 import {
+  BarChart3,
+  Building2,
+  Check,
+  ChevronUp,
+  FolderOpen,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  Settings,
+  Users,
+} from 'lucide-react'
+import { Link, useLocation } from '@tanstack/react-router'
+import { useState } from 'react'
+import type { Workspace } from '@/components/dashboard'
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -6,13 +21,13 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarInset,
-  SidebarTrigger,
   SidebarRail,
+  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -37,31 +52,15 @@ import {
   CommandItem,
 } from '@/components/ui/command'
 import { Badge } from '@/components/ui/badge'
-import {
-  LayoutDashboard,
-  Settings,
-  LogOut,
-  ChevronUp,
-  Building2,
-  FolderOpen,
-  Users,
-  BarChart3,
-  Check,
-  Plus,
-} from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
-import { Link, useLocation } from '@tanstack/react-router'
-import type { Workspace } from '@/components/dashboard'
 import { WorkspaceSidebarSelector } from '@/components/core/workspacePopover'
 
 interface AppSidebarProps {
-  workspaces?: Workspace[]
+  workspaces?: Array<Workspace>
   selectedWorkspace: Workspace | null
   setSelectedWorkspace: (workspace: Workspace) => void
 }
 
-// Logo with Slack-like workspace popover for collapsed sidebar
 function SidebarLogo({
   workspaces,
   selectedWorkspace,
@@ -76,14 +75,13 @@ function SidebarLogo({
       className={cn(
         'flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0',
         isCollapsed &&
-        'cursor-pointer hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2 hover:ring-offset-sidebar transition-all',
+          'cursor-pointer hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2 hover:ring-offset-sidebar transition-all',
       )}
     >
       <Building2 className="h-4 w-4 text-white" />
     </div>
   )
 
-  // When collapsed, show popover on logo click
   if (isCollapsed) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -98,7 +96,6 @@ function SidebarLogo({
           align="start"
           sideOffset={12}
         >
-          {/* Header with current workspace */}
           <div className="flex items-center gap-3 p-3 border-b">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600">
               <Building2 className="h-5 w-5 text-white" />
@@ -113,7 +110,6 @@ function SidebarLogo({
             </div>
           </div>
 
-          {/* Workspace list */}
           <Command>
             <CommandInput placeholder="Search workspaces..." className="h-9" />
             <CommandEmpty>No workspace found.</CommandEmpty>
@@ -165,7 +161,6 @@ function SidebarLogo({
             </CommandGroup>
           </Command>
 
-          {/* Add workspace option */}
           <div className="border-t p-2">
             <button className="flex items-center gap-2 w-full p-2 rounded-md text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
               <Plus className="h-4 w-4" />
@@ -177,7 +172,6 @@ function SidebarLogo({
     )
   }
 
-  // When expanded, just show the logo
   return logoContent
 }
 
@@ -233,7 +227,6 @@ export function AppSidebar({
           </div>
         </div>
 
-        {/* Workspace Selector - only visible when expanded */}
         <div className="px-2 group-data-[collapsible=icon]:hidden">
           <WorkspaceSidebarSelector
             allWorkspaces={workspaces || []}
