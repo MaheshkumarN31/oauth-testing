@@ -102,11 +102,13 @@ export function AddRecipientsContent({
     },
   )
 
-  const contactTypes: Array<ContactType> = Array.isArray(contactTypesData?.data)
-    ? contactTypesData.data
+  const contactTypes: Array<ContactType> = Array.isArray(contactTypesData?.data?.data)
+    ? contactTypesData.data.data
     : Array.isArray(contactTypesData)
       ? contactTypesData
       : []
+
+  console.log(contactTypes, "types")
 
   const createTemplateMutation = useMutation({
     mutationFn: createTemplateAPI,
