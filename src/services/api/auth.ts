@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 import { $fetch } from './fetch'
 
 interface OAuthUrlResponse {
@@ -31,7 +32,6 @@ const ENV = {
  * Get OAuth authorization URL
  */
 export const getOAuthUrl = async (): Promise<OAuthUrlResponse> => {
-  // eslint-disable-next-line no-useless-catch
   try {
     const params = new URLSearchParams({
       client_id: ENV.clientId,
@@ -54,7 +54,6 @@ export const getOAuthUrl = async (): Promise<OAuthUrlResponse> => {
 export const exchangeToken = async (
   code: string,
 ): Promise<OAuthTokenResponse> => {
-  // eslint-disable-next-line no-useless-catch
   try {
     const payload = new URLSearchParams({
       code,
@@ -64,20 +63,36 @@ export const exchangeToken = async (
       grant_type: 'authorization_code',
     })
 
-    const response = await $fetch.postURLEncoded('/oauth/token', payload)
+    console.log(code, ENV, "payload")
+
+    // Use fetch directly with proper headers
+    const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://v2-dev-api.esigns.io/v1.0'
+    const response = await fetch(`${baseURL}/oauth/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: payload.toString(),
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
 
     // Store tokens in localStorage
-    if (response.data.access_token) {
-      localStorage.setItem('access_token', response.data.access_token)
+    if (data.access_token) {
+      localStorage.setItem('access_token', data.access_token)
     }
-    if (response.data.refresh_token) {
-      localStorage.setItem('refresh_token', response.data.refresh_token)
+    if (data.refresh_token) {
+      localStorage.setItem('refresh_token', data.refresh_token)
     }
-    if (response.data.user) {
-      localStorage.setItem('user', JSON.stringify(response.data.user))
+    if (data.user) {
+      localStorage.setItem('user', JSON.stringify(data.user))
     }
 
-    return response.data
+    return data
   } catch (err) {
     throw err
   }
@@ -99,7 +114,6 @@ export const validateToken = async (): Promise<ValidateTokenResponse> => {
  * Refresh access token
  */
 export const refreshToken = async (): Promise<OAuthTokenResponse> => {
-  // eslint-disable-next-line no-useless-catch
   try {
     const refreshToken = localStorage.getItem('refresh_token')
     if (!refreshToken) {
@@ -149,7 +163,6 @@ export const logout = async (): Promise<void> => {
  * Redirect to OAuth login
  */
 export const initiateOAuthLogin = async (): Promise<void> => {
-  // eslint-disable-next-line no-useless-catch
   try {
     const data = await getOAuthUrl()
     if (data.url) {
@@ -164,7 +177,6 @@ export const initiateOAuthLogin = async (): Promise<void> => {
  * Get current user info
  */
 export const getCurrentUser = async () => {
-  // eslint-disable-next-line no-useless-catch
   try {
     const response = await $fetch.get('/oauth/me')
     return response
