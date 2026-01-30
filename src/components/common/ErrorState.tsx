@@ -3,22 +3,13 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 interface ErrorStateProps {
-  /** Error title */
   title?: string
-  /** Error message */
   message?: string
-  /** Retry callback */
   onRetry?: () => void
-  /** Display as full screen centered */
   fullScreen?: boolean
-  /** Additional class name */
   className?: string
 }
 
-/**
- * Reusable error state component
- * Replaces duplicated error states across dashboard.tsx, templates.tsx, etc.
- */
 export function ErrorState({
   title = 'Error loading data',
   message = 'Please try again later',

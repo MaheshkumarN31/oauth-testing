@@ -1,33 +1,22 @@
+import { Search } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { Search } from 'lucide-react'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 
 interface PageHeaderProps {
-  /** Page title */
   title: string
-  /** Title icon */
   icon?: LucideIcon
-  /** Badge text (e.g., workspace name) */
   badge?: string
-  /** Search placeholder text */
   searchPlaceholder?: string
-  /** Search value */
   searchValue?: string
-  /** Search change handler */
   onSearchChange?: (value: string) => void
-  /** Actions to render on right side */
   actions?: ReactNode
-  /** Additional elements to render before title */
   prefix?: ReactNode
 }
 
-/**
- * Reusable page header with sidebar trigger, title, search, and actions
- */
 export function PageHeader({
   title,
   icon: Icon,

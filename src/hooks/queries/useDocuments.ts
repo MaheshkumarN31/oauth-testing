@@ -1,6 +1,4 @@
-// ========================================
-// Documents Query Hook
-// ========================================
+
 
 import { useQuery } from '@tanstack/react-query'
 import { fetchDocuments } from '@/services/api'
@@ -14,9 +12,6 @@ interface UseDocumentsOptions {
   enabled?: boolean
 }
 
-/**
- * Hook to fetch documents with pagination
- */
 export function useDocuments({
   companyId,
   page,
@@ -34,9 +29,7 @@ export function useDocuments({
   })
 }
 
-/**
- * Calculate document statistics from fetched documents
- */
+
 export function calculateDocumentStats(
   documents: Array<{ document_status: string }> | undefined,
 ) {

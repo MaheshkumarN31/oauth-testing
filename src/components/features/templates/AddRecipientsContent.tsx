@@ -76,7 +76,6 @@ export function AddRecipientsContent({
   const docPathsParam = searchParams.get('doc_paths')
   const docPaths = docPathsParam ? JSON.parse(docPathsParam) : []
   const companyId = selectedWorkspace?._id || ''
-
   const [editableTemplateName, setEditableTemplateName] =
     useState(templateNameParam)
   const [recipients, setRecipients] = useState<Array<Recipient>>([
@@ -102,13 +101,15 @@ export function AddRecipientsContent({
     },
   )
 
-  const contactTypes: Array<ContactType> = Array.isArray(contactTypesData?.data?.data)
+  const contactTypes: Array<ContactType> = Array.isArray(
+    contactTypesData?.data?.data,
+  )
     ? contactTypesData.data.data
     : Array.isArray(contactTypesData)
       ? contactTypesData
       : []
 
-  console.log(contactTypes, "types")
+  console.log(contactTypes, 'types')
 
   const createTemplateMutation = useMutation({
     mutationFn: createTemplateAPI,
@@ -202,10 +203,18 @@ export function AddRecipientsContent({
 
       const createResponse =
         await createTemplateMutation.mutateAsync(templatePayload)
-      const templateId = createResponse
 
-      if (!templateId) {
-        throw new Error('Failed to get template ID')
+      console.log('DEBUG: createResponse', createResponse)
+
+      // Handle nested data response structure safety
+      const templateId =
+        createResponse?.data?._id ||
+        createResponse?.data?.data?._id ||
+        createResponse?._id
+
+      if (!templateId || typeof templateId !== 'string') {
+        console.error('Invalid template ID received:', templateId)
+        throw new Error('Failed to get valid template ID from server')
       }
 
       const documentUsers = recipients.map((recipient, index) => {
@@ -224,7 +233,7 @@ export function AddRecipientsContent({
           name: recipient.name,
           contact_type_name: contactType?.name || recipient.role,
           role: recipient.role,
-          _id: recipient.id,
+          // _id removed to let backend generate it
           default: index === 0,
           e_signature_required: recipient.role === 'signer',
           value: recipient.role.toUpperCase(),
@@ -351,32 +360,9 @@ export function AddRecipientsContent({
             <Separator orientation="vertical" className="mx-2 h-4" />
           </>
         }
-        actions={
-          <Button
-            onClick={handleSave}
-            disabled={
-              isSaving ||
-              !editableTemplateName.trim() ||
-              recipients.length === 0
-            }
-            className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/30 transition-all duration-200"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving Template...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                Save Template
-              </>
-            )}
-          </Button>
-        }
       />
 
-      <div className="flex-1 space-y-6 p-6 overflow-auto">
+      <div className="flex-1 space-y-6 p-1 overflow-auto">
         <Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm">
           <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
             <div className="flex items-center gap-3">
@@ -393,7 +379,7 @@ export function AddRecipientsContent({
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="pt-3 space-y-3">
             <div className="space-y-2">
               <Label
                 htmlFor="templateName"
@@ -417,35 +403,6 @@ export function AddRecipientsContent({
                 </p>
               )}
             </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-slate-700">
-                Attached Files
-              </Label>
-              <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge
-                    variant="secondary"
-                    className="bg-indigo-100 text-indigo-700 border-0"
-                  >
-                    {docPaths.length} {docPaths.length === 1 ? 'File' : 'Files'}
-                  </Badge>
-                </div>
-                <div className="space-y-1.5 max-h-32 overflow-auto">
-                  {getFileNamesFromPaths().map(
-                    (fileName: string, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 text-sm text-slate-600"
-                      >
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                        <span className="truncate">{fileName}</span>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
@@ -458,7 +415,7 @@ export function AddRecipientsContent({
                 </div>
                 <div>
                   <CardTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Recipients & Workflow
+                    Add Recipients
                   </CardTitle>
                   <p className="text-sm text-slate-600 mt-0.5">
                     Define who will interact with this template
@@ -474,7 +431,7 @@ export function AddRecipientsContent({
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-6 space-y-4">
+          <CardContent className="pt-2 space-y-4">
             <div className="flex items-center justify-between pb-2">
               <Label className="text-sm font-semibold text-slate-700">
                 Recipient List
@@ -493,7 +450,7 @@ export function AddRecipientsContent({
                       ) : (
                         <Plus className="h-4 w-4" />
                       )}
-                      From Contact Types
+                      Add Contact Types
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-0" align="end">
@@ -546,14 +503,6 @@ export function AddRecipientsContent({
                     </div>
                   </PopoverContent>
                 </Popover>
-                <Button
-                  variant="outline"
-                  onClick={addRecipient}
-                  className="gap-2 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
-                >
-                  <Plus className="h-4 w-4" />
-                  Custom
-                </Button>
               </div>
             </div>
 
@@ -572,27 +521,6 @@ export function AddRecipientsContent({
                     </div>
 
                     <div className="flex items-start gap-4">
-                      <div className="flex flex-col gap-1 pt-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 hover:bg-indigo-100 disabled:opacity-30"
-                          onClick={() => moveRecipient(index, 'up')}
-                          disabled={index === 0}
-                        >
-                          <ChevronUp className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 hover:bg-indigo-100 disabled:opacity-30"
-                          onClick={() => moveRecipient(index, 'down')}
-                          disabled={index === recipients.length - 1}
-                        >
-                          <ChevronDown className="h-4 w-4" />
-                        </Button>
-                      </div>
-
                       <div className="flex-1 space-y-4">
                         <div className="flex items-start gap-3">
                           <div className="flex-1 space-y-1.5">
@@ -625,7 +553,7 @@ export function AddRecipientsContent({
                             </div>
                           </div>
 
-                          <div className="w-44 space-y-1.5">
+                          {/* <div className="w-44 space-y-1.5">
                             <Label className="text-xs font-medium text-slate-600">
                               Role *
                             </Label>
@@ -654,104 +582,18 @@ export function AddRecipientsContent({
                                 ))}
                               </SelectContent>
                             </Select>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-slate-600">
-                              Email Address
-                            </Label>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                              <Input
-                                type="email"
-                                value={recipient.email || ''}
-                                onChange={(e) =>
-                                  updateRecipient(recipient.id, {
-                                    email: e.target.value,
-                                  })
-                                }
-                                placeholder="email@example.com"
-                                className={cn(
-                                  'pl-10 h-11 transition-all',
-                                  hasEmailError
-                                    ? 'border-red-300 focus:border-red-500'
-                                    : 'border-slate-200 focus:border-indigo-500',
-                                )}
-                              />
-                              {hasEmailError && (
-                                <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                                  <AlertCircle className="h-3 w-3" />
-                                  {hasEmailError}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-slate-600">
-                              Phone Number
-                            </Label>
-                            <div className="relative">
-                              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                              <Input
-                                type="tel"
-                                value={recipient.phone || ''}
-                                onChange={(e) =>
-                                  updateRecipient(recipient.id, {
-                                    phone: e.target.value,
-                                  })
-                                }
-                                placeholder="+1 (555) 000-0000"
-                                className="pl-10 h-11 border-slate-200 focus:border-indigo-500 transition-all"
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 pt-1">
-                          <Badge
-                            variant="secondary"
-                            className={cn(
-                              'text-xs font-medium border-0',
-                              recipient.role === 'signer' &&
-                              'bg-emerald-100 text-emerald-700',
-                              recipient.role === 'sender' &&
-                              'bg-blue-100 text-blue-700',
-                              recipient.role === 'viewer' &&
-                              'bg-slate-100 text-slate-700',
-                              recipient.role === 'approver' &&
-                              'bg-purple-100 text-purple-700',
-                              recipient.role === 'cc' &&
-                              'bg-amber-100 text-amber-700',
-                            )}
-                          >
-                            {
-                              ROLE_OPTIONS.find(
-                                (r) => r.value === recipient.role,
-                              )?.icon
-                            }{' '}
-                            {recipient.role.charAt(0).toUpperCase() +
-                              recipient.role.slice(1)}
-                          </Badge>
-                          {recipient.role === 'signer' && (
-                            <span className="text-xs text-slate-500 flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" />
-                              E-signature required
-                            </span>
-                          )}
+                          </div> */}
                         </div>
                       </div>
 
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all shrink-0 opacity-0 group-hover:opacity-100"
+                        className="h-9 w-9 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all shrink-0 opacity-0 group-hover:opacity-100 mt-5"
                         onClick={() => removeRecipient(recipient.id)}
                         disabled={recipients.length <= 1}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-10 w-10 text-red-500" />
                       </Button>
                     </div>
                   </div>

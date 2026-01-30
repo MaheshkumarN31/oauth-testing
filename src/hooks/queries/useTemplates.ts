@@ -1,6 +1,3 @@
-// ========================================
-// Templates Query Hook
-// ========================================
 
 import { useQuery } from '@tanstack/react-query'
 import { fetchTemplatesAPI } from '@/services/api'
@@ -14,9 +11,6 @@ interface UseTemplatesOptions {
   enabled?: boolean
 }
 
-/**
- * Hook to fetch templates with pagination
- */
 export function useTemplates({
   companyId,
   page,

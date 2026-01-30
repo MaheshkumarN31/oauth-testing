@@ -11,10 +11,6 @@ import { calculateDocumentStats, useDocuments } from '@/hooks/queries'
 interface DashboardContentProps {
   selectedWorkspace: Workspace | null
 }
-
-/**
- * Dashboard page content with stats and documents table
- */
 export function DashboardContent({ selectedWorkspace }: DashboardContentProps) {
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)

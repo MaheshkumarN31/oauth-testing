@@ -2,13 +2,9 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface LoadingSpinnerProps {
-  /** Size variant */
   size?: 'sm' | 'md' | 'lg'
-  /** Display as full screen centered */
   fullScreen?: boolean
-  /** Loading message */
   message?: string
-  /** Additional class name */
   className?: string
 }
 
@@ -18,10 +14,6 @@ const sizeClasses = {
   lg: 'h-12 w-12',
 }
 
-/**
- * Reusable loading spinner component
- * Replaces duplicated loading states across dashboard.tsx, templates.tsx, etc.
- */
 export function LoadingSpinner({
   size = 'md',
   fullScreen = false,

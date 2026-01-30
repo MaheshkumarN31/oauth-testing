@@ -21,6 +21,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '../layout/AppSidebar'
+import type { Workspace } from '@/types'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -37,8 +38,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
-
-import type { Workspace } from '@/types'
 
 interface FileUploadStatus {
   file: File
@@ -103,7 +102,8 @@ const Templates = () => {
       if (!token) throw new Error('No access token found')
 
       const res = await fetch(
-        `${import.meta.env.VITE_PUBLIC_URL}/api/company-document-responses-v2?company_id=${company_id}&page=${pageIndex + 1
+        `${import.meta.env.VITE_PUBLIC_URL}/api/company-document-responses-v2?company_id=${company_id}&page=${
+          pageIndex + 1
         }&limit=${pageSize}`,
         {
           headers: {

@@ -28,9 +28,7 @@ const ENV = {
   state: import.meta.env.VITE_OAUTH_STATE,
 }
 
-/**
- * Get OAuth authorization URL
- */
+
 export const getOAuthUrl = async (): Promise<OAuthUrlResponse> => {
   try {
     const params = new URLSearchParams({
@@ -48,9 +46,6 @@ export const getOAuthUrl = async (): Promise<OAuthUrlResponse> => {
   }
 }
 
-/**
- * Exchange authorization code for access token
- */
 export const exchangeToken = async (
   code: string,
 ): Promise<OAuthTokenResponse> => {
@@ -65,7 +60,6 @@ export const exchangeToken = async (
 
     console.log(code, ENV, "payload")
 
-    // Use fetch directly with proper headers
     const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://v2-dev-api.esigns.io/v1.0'
     const response = await fetch(`${baseURL}/oauth/token`, {
       method: 'POST',
@@ -81,7 +75,6 @@ export const exchangeToken = async (
 
     const rawData = await response.json()
 
-    // Normalize data to match OAuthTokenResponse interface (snake_case)
     const data: OAuthTokenResponse = {
       access_token: rawData.access_token || rawData.accessToken,
       refresh_token: rawData.refresh_token || rawData.refreshToken,
@@ -90,7 +83,6 @@ export const exchangeToken = async (
       user: rawData.user
     }
 
-    // Store tokens in localStorage
     if (data.access_token) {
       localStorage.setItem('access_token', data.access_token)
     }
@@ -107,9 +99,6 @@ export const exchangeToken = async (
   }
 }
 
-/**
- * Validate current access token
- */
 export const validateToken = async (): Promise<ValidateTokenResponse> => {
   try {
     const response = await $fetch.get('/oauth/protected1')
@@ -119,9 +108,7 @@ export const validateToken = async (): Promise<ValidateTokenResponse> => {
   }
 }
 
-/**
- * Refresh access token
- */
+
 export const refreshToken = async (): Promise<OAuthTokenResponse> => {
   try {
     const refreshToken = localStorage.getItem('refresh_token')
@@ -133,7 +120,6 @@ export const refreshToken = async (): Promise<OAuthTokenResponse> => {
       refresh_token: refreshToken,
     })
 
-    // Update access token
     if (response.data.access_token) {
       localStorage.setItem('access_token', response.data.access_token)
     }
@@ -144,22 +130,16 @@ export const refreshToken = async (): Promise<OAuthTokenResponse> => {
   }
 }
 
-/**
- * Logout user
- */
 export const logout = async (): Promise<void> => {
   try {
     await $fetch.post('/oauth/logout')
   } catch (err) {
-    // Continue with local logout even if API call fails
     console.error('Logout API error:', err)
   } finally {
-    // Clear local storage
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
 
-    // Clear indexedDB
     indexedDB.databases().then((databases) => {
       databases.forEach((db) => {
         if (db.name) indexedDB.deleteDatabase(db.name)
@@ -168,9 +148,6 @@ export const logout = async (): Promise<void> => {
   }
 }
 
-/**
- * Redirect to OAuth login
- */
 export const initiateOAuthLogin = async (): Promise<void> => {
   try {
     const data = await getOAuthUrl()
@@ -182,9 +159,6 @@ export const initiateOAuthLogin = async (): Promise<void> => {
   }
 }
 
-/**
- * Get current user info
- */
 export const getCurrentUser = async () => {
   try {
     const response = await $fetch.get('/oauth/me')

@@ -95,46 +95,7 @@ export function RecipientEditor({
                   className="flex-1 bg-transparent border-0 border-b border-muted-foreground/30 rounded-none focus-visible:ring-0 focus-visible:border-indigo-500 px-0"
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-3 pl-13">
-                <Input
-                  type="email"
-                  value={recipient.email || ''}
-                  onChange={(e) =>
-                    updateRecipient(recipient.id, { email: e.target.value })
-                  }
-                  placeholder="Email address"
-                  className="text-sm"
-                />
-                <Input
-                  type="tel"
-                  value={recipient.phone || ''}
-                  onChange={(e) =>
-                    updateRecipient(recipient.id, { phone: e.target.value })
-                  }
-                  placeholder="Phone number"
-                  className="text-sm"
-                />
-              </div>
             </div>
-
-            <Select
-              value={recipient.role}
-              onValueChange={(value) =>
-                updateRecipient(recipient.id, { role: value as RecipientRole })
-              }
-            >
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
 
             <Button
               variant="ghost"

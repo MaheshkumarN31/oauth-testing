@@ -2,19 +2,12 @@ import type { LucideIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface StatCardProps {
-  /** Card title */
   title: string
-  /** Value to display */
   value: number | string
-  /** Icon component */
   icon: LucideIcon
-  /** Gradient color class */
   colorClass?: string
 }
 
-/**
- * Reusable statistics card component
- */
 export function StatCard({
   title,
   value,

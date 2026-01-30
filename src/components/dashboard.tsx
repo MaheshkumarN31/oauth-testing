@@ -15,13 +15,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from './layout/AppSidebar'
+import type { Workspace } from '@/types'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 import { Input } from '@/components/ui/input'
-
-import type { Workspace } from '@/types'
 
 const Dashboard = () => {
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
@@ -70,7 +69,8 @@ const Dashboard = () => {
       if (!token) throw new Error('No access token found')
 
       const res = await fetch(
-        `${import.meta.env.VITE_PUBLIC_URL}/api/company-document-responses-v2?company_id=${company_id}&page=${pageIndex + 1
+        `${import.meta.env.VITE_PUBLIC_URL}/api/company-document-responses-v2?company_id=${company_id}&page=${
+          pageIndex + 1
         }&limit=${pageSize}`,
         {
           headers: {
@@ -132,7 +132,7 @@ const Dashboard = () => {
     {
       title: 'Pending',
       value:
-        (Array.isArray(documentsData?.data) ? documentsData.data : []).filter(
+        documentsData?.data?.filter(
           (d: any) => d.document_status === 'INPROGRESS',
         ).length || 0,
       icon: Clock,
@@ -141,7 +141,7 @@ const Dashboard = () => {
     {
       title: 'Completed',
       value:
-        (Array.isArray(documentsData?.data) ? documentsData.data : []).filter(
+        documentsData?.data?.filter(
           (d: any) => d.document_status === 'COMPLETED',
         ).length || 0,
       icon: CheckCircle2,
@@ -150,7 +150,7 @@ const Dashboard = () => {
     {
       title: 'Draft',
       value:
-        (Array.isArray(documentsData?.data) ? documentsData.data : []).filter((d: any) => d.document_status === 'DRAFT')
+        documentsData?.data?.filter((d: any) => d.document_status === 'DRAFT')
           .length || 0,
       icon: AlertCircle,
       color: 'bg-gradient-to-br from-slate-500 to-gray-600',
