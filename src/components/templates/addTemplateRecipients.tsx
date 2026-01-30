@@ -32,6 +32,8 @@ import {
 } from '@/components/ui/select'
 
 import { ROLE_OPTIONS } from '@/types'
+import { useWorkspaces } from '@/hooks/queries'
+import { getContactTypesAPI } from '@/services/api'
 
 const AddTemplateRecipients = () => {
   const searchParams = new URLSearchParams(window.location.search)
@@ -49,27 +51,12 @@ const AddTemplateRecipients = () => {
   const [editableTemplateName, setEditableTemplateName] =
     useState(templateNameParam)
 
-  const { data: workspaces, isLoading } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const token = localStorage.getItem('access_token')
-      if (!token) throw new Error('No access token found')
+  const { data: workspaces, isLoading } = useWorkspaces()
 
-      const res = await fetch(
-        `${import.meta.env.VITE_PUBLIC_URL}/api/workspaces/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-
-      if (!res.ok) {
-        throw new Error('Failed to fetch user data')
-      }
-
-      return res.json()
-    },
+  const { data: contactTypes } = useQuery({
+    queryKey: ['contact-types', selectedWorkspace?._id],
+    queryFn: () => getContactTypesAPI({ company_id: selectedWorkspace?._id || '' }),
+    enabled: !!selectedWorkspace?._id
   })
 
   useEffect(() => {
@@ -239,9 +226,30 @@ const AddTemplateRecipients = () => {
                           })
                         }
                         placeholder="Recipient name"
-                        className="max-w-[200px] bg-transparent border-0 border-b border-muted-foreground/30 rounded-none focus-visible:ring-0 focus-visible:border-indigo-500 px-0"
+                        className="max-w-[160px] bg-transparent border-0 border-b border-muted-foreground/30 rounded-none focus-visible:ring-0 focus-visible:border-indigo-500 px-0"
                       />
                     </div>
+
+                    <Select
+                      value={recipient.contact_type || 'default'}
+                      onValueChange={(value) =>
+                        updateRecipient(recipient.id, {
+                          contact_type: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Contact Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Default</SelectItem>
+                        {contactTypes?.data?.map((type: any) => (
+                          <SelectItem key={type.id} value={type.name}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
                     <Select
                       value={recipient.role}
@@ -288,7 +296,7 @@ const AddTemplateRecipients = () => {
           </Card>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarProvider >
   )
 }
 

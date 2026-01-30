@@ -27,7 +27,8 @@ export function useTemplates({
     queryKey: [TEMPLATES_QUERY_KEY, companyId, page, pageSize],
     queryFn: async () => {
       if (!companyId) throw new Error('No company ID provided')
-      return fetchTemplatesAPI({ company_id: companyId, page: page + 1, limit: pageSize })
+      const response = await fetchTemplatesAPI({ company_id: companyId, page: page + 1, limit: pageSize })
+      return response.data
     },
     enabled: enabled && !!companyId,
   })

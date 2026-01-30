@@ -27,7 +27,8 @@ export function useDocuments({
     queryKey: [DOCUMENTS_QUERY_KEY, companyId, page, pageSize],
     queryFn: async () => {
       if (!companyId) throw new Error('No company ID provided')
-      return fetchDocuments({ company_id: companyId, page: page + 1, limit: pageSize })
+      const response = await fetchDocuments({ company_id: companyId, page: page + 1, limit: pageSize })
+      return response.data
     },
     enabled: enabled && !!companyId,
   })
