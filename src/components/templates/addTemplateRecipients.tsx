@@ -42,9 +42,10 @@ const AddTemplateRecipients = () => {
   const docPathsParam = searchParams.get('doc_paths')
   const docPaths = docPathsParam ? JSON.parse(docPathsParam) : []
 
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
-    null,
-  )
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(() => {
+    const saved = localStorage.getItem('selected_workspace_id')
+    return saved ? { _id: saved, id: saved, name: '' } as Workspace : null
+  })
   const [recipients, setRecipients] = useState<Array<Recipient>>([
     { id: '1', name: 'Sender', role: 'signer' },
   ])
@@ -60,8 +61,21 @@ const AddTemplateRecipients = () => {
   })
 
   useEffect(() => {
-    if (!selectedWorkspace && workspaces?.data?.[0]) {
-      setSelectedWorkspace(workspaces.data[0])
+    if (workspaces) {
+      const workspaceList = Array.isArray(workspaces) ? workspaces : workspaces.data || []
+
+      const savedId = localStorage.getItem('selected_workspace_id')
+      if (savedId) {
+        const found = workspaceList.find((w: Workspace) => w._id === savedId || w.id === savedId)
+        if (found && found._id !== selectedWorkspace?._id) {
+          setSelectedWorkspace(found)
+          return
+        }
+      }
+
+      if (!selectedWorkspace && workspaceList.length > 0) {
+        setSelectedWorkspace(workspaceList[0])
+      }
     }
   }, [workspaces, selectedWorkspace])
 

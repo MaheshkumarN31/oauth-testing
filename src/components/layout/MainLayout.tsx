@@ -19,14 +19,38 @@ interface MainLayoutProps {
  */
 export function MainLayout({ children }: MainLayoutProps) {
   const { data: workspaces, isLoading, isError, refetch } = useWorkspaces()
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
-    null,
-  )
+  // Initialize state from localStorage if available
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(() => {
+    const saved = localStorage.getItem('selected_workspace_id')
+    return saved ? { _id: saved, id: saved, name: '' } as Workspace : null
+  })
 
-  // Set default workspace when data loads
+  // Update localStorage when selection changes
   useEffect(() => {
-    if (workspaces && !selectedWorkspace) {
-      setSelectedWorkspace(getDefaultWorkspace(workspaces))
+    if (selectedWorkspace?._id) {
+      localStorage.setItem('selected_workspace_id', selectedWorkspace._id)
+    }
+  }, [selectedWorkspace])
+
+  // Sync with fetched workspaces and handle defaults
+  useEffect(() => {
+    if (workspaces) {
+      const workspaceList = Array.isArray(workspaces) ? workspaces : workspaces.data || []
+
+      // If we have a saved ID, try to find the full workspace object
+      const savedId = localStorage.getItem('selected_workspace_id')
+      if (savedId && (!selectedWorkspace || !selectedWorkspace.name)) {
+        const found = workspaceList.find((w: Workspace) => w._id === savedId || w.id === savedId)
+        if (found) {
+          setSelectedWorkspace(found)
+          return
+        }
+      }
+
+      // If no selection or invalid selection, set default
+      if (!selectedWorkspace && workspaceList.length > 0) {
+        setSelectedWorkspace(getDefaultWorkspace(workspaceList))
+      }
     }
   }, [workspaces, selectedWorkspace])
 
