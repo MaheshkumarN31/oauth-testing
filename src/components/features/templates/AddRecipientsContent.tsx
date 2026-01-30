@@ -102,7 +102,11 @@ export function AddRecipientsContent({
     },
   )
 
-  const contactTypes: Array<ContactType> = contactTypesData?.data || []
+  const contactTypes: Array<ContactType> = Array.isArray(contactTypesData?.data)
+    ? contactTypesData.data
+    : Array.isArray(contactTypesData)
+      ? contactTypesData
+      : []
 
   const createTemplateMutation = useMutation({
     mutationFn: createTemplateAPI,
@@ -710,15 +714,15 @@ export function AddRecipientsContent({
                             className={cn(
                               'text-xs font-medium border-0',
                               recipient.role === 'signer' &&
-                                'bg-emerald-100 text-emerald-700',
+                              'bg-emerald-100 text-emerald-700',
                               recipient.role === 'sender' &&
-                                'bg-blue-100 text-blue-700',
+                              'bg-blue-100 text-blue-700',
                               recipient.role === 'viewer' &&
-                                'bg-slate-100 text-slate-700',
+                              'bg-slate-100 text-slate-700',
                               recipient.role === 'approver' &&
-                                'bg-purple-100 text-purple-700',
+                              'bg-purple-100 text-purple-700',
                               recipient.role === 'cc' &&
-                                'bg-amber-100 text-amber-700',
+                              'bg-amber-100 text-amber-700',
                             )}
                           >
                             {

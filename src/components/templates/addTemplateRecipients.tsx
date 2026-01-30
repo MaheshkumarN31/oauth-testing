@@ -60,6 +60,8 @@ const AddTemplateRecipients = () => {
     enabled: !!selectedWorkspace?._id
   })
 
+  console.log('DEBUG: contactTypes structure:', contactTypes)
+
   useEffect(() => {
     if (workspaces) {
       const workspaceList = Array.isArray(workspaces) ? workspaces : workspaces.data || []
@@ -257,7 +259,7 @@ const AddTemplateRecipients = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="default">Default</SelectItem>
-                        {contactTypes?.data?.map((type: any) => (
+                        {(Array.isArray(contactTypes?.data) ? contactTypes.data : Array.isArray(contactTypes) ? contactTypes : []).map((type: any) => (
                           <SelectItem key={type.id} value={type.name}>
                             {type.name}
                           </SelectItem>

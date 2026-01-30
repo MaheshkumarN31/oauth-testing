@@ -101,7 +101,7 @@ export function CreateTemplateDialog({
 
             if (!uploadUrls || uploadUrls.length !== selectedFiles.length) {
                 console.error('Invalid URLs:', uploadUrls, 'Expected:', selectedFiles.length)
-                const receivedKeys = Object.keys(data).join(', ')
+                const receivedKeys = Object.keys(apiData).join(', ')
                 throw new Error(`Invalid response from API. Keys found: [${receivedKeys}]. Expected 'upload_urls' or 'presigned_urls'.`)
             }
 
