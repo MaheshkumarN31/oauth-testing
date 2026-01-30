@@ -1,114 +1,231 @@
 // ========================================
-// Centralized Type Definitions
+// TypeScript Type Definitions
 // ========================================
 
+export interface IAPIResponse {
+  success: boolean;
+  status: number;
+  data: any;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  status?: number;
+  data: T;
+  message?: string;
+  error?: string;
+}
+
+// ========================================
+// OAuth Types
+// ========================================
+
+export interface OAuthUrlResponse {
+  url: string;
+  state?: string;
+}
+
+export interface OAuthTokenResponse {
+  access_token: string;
+  refresh_token?: string;
+  token_type?: string;
+  expires_in?: number;
+  user?: User;
+}
+
+export interface ValidateTokenResponse {
+  valid: boolean;
+  user?: User;
+}
+
+// ========================================
+// User Types
+// ========================================
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  role?: string;
+  company_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: any;
+}
+
+// ========================================
 // Workspace Types
+// ========================================
+
 export interface Workspace {
-    _id: string
-    name: string
-    type: string
-    status: string
-    user_id: string
-    application_theme: string
-    created_at: Date
-    updated_at: Date
-    plan_type: string
-    is_owner: boolean
-    user_types: Array<UserType>
+  id: string;
+  name: string;
+  description?: string;
+  company_id?: string;
+  owner_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  members_count?: number;
+  documents_count?: number;
+  [key: string]: any;
 }
 
-export interface UserType {
-    user_type_id: string
-    user_type_name: string
+export interface WorkspacesResponse {
+  workspaces: Array<Workspace>;
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
 }
 
+export interface WorkspaceMember {
+  id: string;
+  user_id: string;
+  workspace_id: string;
+  role: string;
+  user?: User;
+  joined_at?: string;
+  [key: string]: any;
+}
+
+// ========================================
 // Document Types
+// ========================================
+
 export interface Document {
-    _id: string
-    document_name: string
-    document_status: 'DRAFT' | 'INPROGRESS' | 'COMPLETED' | 'EXPIRED' | 'DECLINED'
-    created_at: string
-    updated_at: string
-    company_id: string
-    sender_name?: string
-    recipient_count?: number
+  id: string;
+  title: string;
+  content?: any;
+  company_id: string;
+  workspace_id?: string;
+  status?: "draft" | "published" | "archived";
+  template_id?: string;
+  created_by?: string;
+  updated_by?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: any;
 }
 
 export interface DocumentsResponse {
-    data: Array<Document>
-    total: number
-    page: number
-    limit: number
+  documents: Array<Document>;
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
 }
 
+// ========================================
 // Template Types
+// ========================================
+
 export interface Template {
-    _id: string
-    template_name: string
-    created_at: string
-    updated_at: string
-    company_id: string
-    doc_paths: Array<string>
-    recipients: Array<Recipient>
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  company_id: string;
+  content?: any;
+  thumbnail_url?: string;
+  is_public?: boolean;
+  created_by?: string;
+  updated_by?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: any;
 }
 
 export interface TemplatesResponse {
-    data: Array<Template>
-    total: number
-    page: number
-    limit: number
+  templates: Array<Template>;
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
 }
 
-// Recipient Types
-export type RecipientRole = 'signer' | 'approver' | 'viewer' | 'cc'
-
-export interface Recipient {
-    id: string
-    name: string
-    role: RecipientRole
-    email?: string
-}
-
-export const ROLE_OPTIONS: Array<{ value: RecipientRole; label: string }> = [
-    { value: 'signer', label: 'Signer' },
-    { value: 'approver', label: 'Approver' },
-    { value: 'viewer', label: 'Viewer' },
-    { value: 'cc', label: 'CC' },
-]
-
-// File Upload Types
-export type FileUploadStatusType = 'pending' | 'uploading' | 'success' | 'error'
-
-export interface FileUploadStatus {
-    file: File
-    status: FileUploadStatusType
-    progress?: number
-    error?: string
-}
-
-// API Response Types
-export interface ApiResponse<T> {
-    data: T
-    message?: string
-    success?: boolean
+export interface PresignedUrlData {
+  filename: string;
+  url: string;
+  file_key: string;
+  expires_at?: string;
 }
 
 export interface PresignedUrlResponse {
-    upload_urls: Array<string>
-    doc_paths: Array<string>
+  presigned_urls: Array<PresignedUrlData>;
 }
 
-// Auth Types
-export interface OAuthTokenResponse {
-    accessToken: string
-    refreshToken?: string
-    user: {
-        _id: string
-        email: string
-        name?: string
-    }
+export interface UploadProgress {
+  index: number;
+  status: "uploading" | "success" | "error";
+  progress?: number;
 }
 
-export interface OAuthUrlResponse {
-    url: string
+export interface UploadResult {
+  success: boolean;
+  filename?: string;
+  file_key?: string;
+  error?: string;
 }
+
+// ========================================
+// Contact Types
+// ========================================
+
+export interface ContactType {
+  id: string;
+  name: string;
+  company_id: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: any;
+}
+
+export interface ContactTypesResponse {
+  contact_types: Array<ContactType>;
+  total: number;
+}
+
+// ========================================
+// Pagination & Filter Types
+// ========================================
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface SortParams {
+  sort_by?: string;
+  sort_order?: "asc" | "desc";
+}
+
+export interface SearchParams {
+  search?: string;
+}
+
+export interface FilterParams extends PaginationParams, SortParams, SearchParams {
+  [key: string]: any;
+}
+
+// ========================================
+// Common Request/Response Types
+// ========================================
+
+export interface ErrorResponse {
+  success: false;
+  status: number;
+  error: string;
+  message?: string;
+  error_code?: string;
+  details?: any;
+}
+
+export interface SuccessResponse<T = any> {
+  success: true;
+  status: number;
+  data: T;
+  message?: string;
+}
+
+export type APIResponse<T = any> = SuccessResponse<T> | ErrorResponse;

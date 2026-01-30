@@ -5,211 +5,227 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { FileUploadZone } from './FileUploadZone'
 import { getPresignedUrls, uploadMultipleFiles } from '@/services/api'
 import type { FileUploadStatus } from '@/types'
 
 interface CreateTemplateDialogProps {
-    companyId: string | undefined
-    userId: string
+  companyId: string | undefined
+  userId: string
 }
 
 /**
  * Dialog for creating new templates with file upload
  */
-export function CreateTemplateDialog({ companyId, userId }: CreateTemplateDialogProps) {
-    const [isOpen, setIsOpen] = useState(false)
-    const [templateName, setTemplateName] = useState('')
-    const [selectedFiles, setSelectedFiles] = useState<Array<File>>([])
-    const [isUploading, setIsUploading] = useState(false)
-    const [uploadStatuses, setUploadStatuses] = useState<Array<FileUploadStatus>>([])
+export function CreateTemplateDialog({
+  companyId,
+  userId,
+}: CreateTemplateDialogProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [selectedFiles, setSelectedFiles] = useState<Array<File>>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadStatuses, setUploadStatuses] = useState<Array<FileUploadStatus>>(
+    [],
+  )
 
-    const resetDialog = () => {
-        setTemplateName('')
-        setSelectedFiles([])
-        setUploadStatuses([])
-        setIsUploading(false)
+  const resetDialog = () => {
+    setTemplateName('')
+    setSelectedFiles([])
+    setUploadStatuses([])
+    setIsUploading(false)
+  }
+
+  const handleCancel = () => {
+    setIsOpen(false)
+    resetDialog()
+  }
+
+  const handleFilesSelect = (files: Array<File>) => {
+    setSelectedFiles((prev) => [...prev, ...files])
+  }
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleRemoveAllFiles = () => {
+    setSelectedFiles([])
+  }
+
+  const handleCreateTemplate = async () => {
+    if (!templateName.trim()) {
+      alert('Please enter a template name')
+      return
+    }
+    if (selectedFiles.length === 0) {
+      alert('Please upload at least one file')
+      return
+    }
+    if (!companyId) {
+      alert('No workspace selected')
+      return
     }
 
-    const handleCancel = () => {
-        setIsOpen(false)
-        resetDialog()
-    }
+    setIsUploading(true)
 
-    const handleFilesSelect = (files: Array<File>) => {
-        setSelectedFiles((prev) => [...prev, ...files])
-    }
-
-    const handleRemoveFile = (index: number) => {
-        setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
-    }
-
-    const handleRemoveAllFiles = () => {
-        setSelectedFiles([])
-    }
-
-    const handleCreateTemplate = async () => {
-        if (!templateName.trim()) {
-            alert('Please enter a template name')
-            return
-        }
-        if (selectedFiles.length === 0) {
-            alert('Please upload at least one file')
-            return
-        }
-        if (!companyId) {
-            alert('No workspace selected')
-            return
-        }
-
-        setIsUploading(true)
-
-        const initialStatuses: Array<FileUploadStatus> = selectedFiles.map((file) => ({
-            file,
-            status: 'pending',
-        }))
-        setUploadStatuses(initialStatuses)
-
-        try {
-            const filenames = selectedFiles.map((file) => file.name)
-            const presignedData = await getPresignedUrls(filenames, companyId)
-            const { upload_urls, doc_paths } = presignedData.data || {}
-
-            if (!upload_urls || upload_urls.length !== selectedFiles.length) {
-                throw new Error('Invalid response from presigned URL API')
-            }
-
-            const results = await uploadMultipleFiles(
-                selectedFiles,
-                upload_urls,
-                (index, status) => {
-                    setUploadStatuses((prev) =>
-                        prev.map((s, i) => (i === index ? { ...s, status } : s))
-                    )
-                }
-            )
-
-            const successfulUploads = results.filter((r) => r.success)
-
-            if (successfulUploads.length === selectedFiles.length) {
-                setIsOpen(false)
-                const searchParams = new URLSearchParams({
-                    user_id: userId,
-                    template_name: templateName,
-                    doc_paths: JSON.stringify(doc_paths),
-                })
-                window.location.href = `/templates/add-recipients?${searchParams.toString()}`
-            } else {
-                const failedCount = selectedFiles.length - successfulUploads.length
-                alert(`${failedCount} file(s) failed to upload. Please try again.`)
-            }
-        } catch (error) {
-            console.error('Upload error:', error)
-            alert('Failed to upload files. Please try again.')
-        } finally {
-            setIsUploading(false)
-        }
-    }
-
-    return (
-        <Dialog
-            open={isOpen}
-            onOpenChange={(open) => {
-                if (!isUploading) {
-                    setIsOpen(open)
-                    if (!open) resetDialog()
-                }
-            }}
-        >
-            <DialogTrigger asChild>
-                <Button className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-                    <Plus className="h-4 w-4" />
-                    Create New Template
-                </Button>
-            </DialogTrigger>
-            <DialogContent
-                className="sm:max-w-[600px] max-h-[85vh] overflow-hidden flex flex-col"
-                showCloseButton={!isUploading}
-            >
-                <DialogHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600">
-                            <FileText className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                            <DialogTitle className="text-xl">Create New Template</DialogTitle>
-                            <DialogDescription>
-                                Upload PDF files to create a new document template
-                            </DialogDescription>
-                        </div>
-                    </div>
-                </DialogHeader>
-
-                <div className="space-y-6 py-4 flex-1 overflow-auto">
-                    {/* Template Name Input */}
-                    <div className="space-y-2">
-                        <Label htmlFor="templateName" className="text-sm font-medium">
-                            Template Name
-                        </Label>
-                        <Input
-                            id="templateName"
-                            placeholder="Enter template name..."
-                            value={templateName}
-                            onChange={(e) => setTemplateName(e.target.value)}
-                            className="h-11"
-                            disabled={isUploading}
-                        />
-                    </div>
-
-                    {/* File Upload Zone */}
-                    <FileUploadZone
-                        selectedFiles={selectedFiles}
-                        uploadStatuses={uploadStatuses}
-                        isUploading={isUploading}
-                        onFilesSelect={handleFilesSelect}
-                        onRemoveFile={handleRemoveFile}
-                        onRemoveAllFiles={handleRemoveAllFiles}
-                    />
-                </div>
-
-                <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
-                    <Button variant="outline" onClick={handleCancel} disabled={isUploading}>
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleCreateTemplate}
-                        disabled={!templateName.trim() || selectedFiles.length === 0 || isUploading}
-                        className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-                    >
-                        {isUploading ? (
-                            <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Uploading...
-                            </>
-                        ) : (
-                            <>
-                                <Upload className="h-4 w-4" />
-                                Upload
-                                {selectedFiles.length > 0 && (
-                                    <Badge variant="secondary" className="ml-1 bg-white/20 text-white">
-                                        {selectedFiles.length}
-                                    </Badge>
-                                )}
-                            </>
-                        )}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+    const initialStatuses: Array<FileUploadStatus> = selectedFiles.map(
+      (file) => ({
+        file,
+        status: 'pending',
+      }),
     )
+    setUploadStatuses(initialStatuses)
+
+    try {
+      const filenames = selectedFiles.map((file) => file.name)
+      const presignedData = await getPresignedUrls(filenames, companyId)
+      const { upload_urls, doc_paths } = presignedData.data || {}
+
+      if (!upload_urls || upload_urls.length !== selectedFiles.length) {
+        throw new Error('Invalid response from presigned URL API')
+      }
+
+      const results = await uploadMultipleFiles(
+        selectedFiles,
+        upload_urls,
+        (index, status) => {
+          setUploadStatuses((prev) =>
+            prev.map((s, i) => (i === index ? { ...s, status } : s)),
+          )
+        },
+      )
+
+      const successfulUploads = results.filter((r) => r.success)
+
+      if (successfulUploads.length === selectedFiles.length) {
+        setIsOpen(false)
+        const searchParams = new URLSearchParams({
+          user_id: userId,
+          template_name: templateName,
+          doc_paths: JSON.stringify(doc_paths),
+        })
+        window.location.href = `/templates/add-recipients?${searchParams.toString()}`
+      } else {
+        const failedCount = selectedFiles.length - successfulUploads.length
+        alert(`${failedCount} file(s) failed to upload. Please try again.`)
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      alert('Failed to upload files. Please try again.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!isUploading) {
+          setIsOpen(open)
+          if (!open) resetDialog()
+        }
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+          <Plus className="h-4 w-4" />
+          Create New Template
+        </Button>
+      </DialogTrigger>
+      <DialogContent
+        className="sm:max-w-[600px] max-h-[85vh] overflow-hidden flex flex-col"
+        showCloseButton={!isUploading}
+      >
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600">
+              <FileText className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl">Create New Template</DialogTitle>
+              <DialogDescription>
+                Upload PDF files to create a new document template
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4 flex-1 overflow-auto">
+          {/* Template Name Input */}
+          <div className="space-y-2">
+            <Label htmlFor="templateName" className="text-sm font-medium">
+              Template Name
+            </Label>
+            <Input
+              id="templateName"
+              placeholder="Enter template name..."
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              className="h-11"
+              disabled={isUploading}
+            />
+          </div>
+
+          {/* File Upload Zone */}
+          <FileUploadZone
+            selectedFiles={selectedFiles}
+            uploadStatuses={uploadStatuses}
+            isUploading={isUploading}
+            onFilesSelect={handleFilesSelect}
+            onRemoveFile={handleRemoveFile}
+            onRemoveAllFiles={handleRemoveAllFiles}
+          />
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isUploading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreateTemplate}
+            disabled={
+              !templateName.trim() || selectedFiles.length === 0 || isUploading
+            }
+            className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                Upload
+                {selectedFiles.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 bg-white/20 text-white"
+                  >
+                    {selectedFiles.length}
+                  </Badge>
+                )}
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 export default CreateTemplateDialog

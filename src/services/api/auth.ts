@@ -1,82 +1,172 @@
-// ========================================
-// OAuth Authentication API
-// ========================================
+import { $fetch } from "./fetch";
 
-import { apiPostPublic, apiGet, setAccessToken } from './client'
-import type { OAuthTokenResponse, OAuthUrlResponse } from '@/types'
+interface OAuthUrlResponse {
+  url: string;
+  state?: string;
+}
+
+interface OAuthTokenResponse {
+  access_token: string;
+  refresh_token?: string;
+  token_type?: string;
+  expires_in?: number;
+  user?: any;
+}
+
+interface ValidateTokenResponse {
+  valid: boolean;
+  user?: any;
+}
 
 const ENV = {
-    clientId: import.meta.env.VITE_OAUTH_CLIENT_ID,
-    clientSecret: import.meta.env.VITE_OAUTH_CLIENT_SECRET,
-    redirectUri: import.meta.env.VITE_OAUTH_REDIRECT_URI,
-    responseType: import.meta.env.VITE_OAUTH_RESPONSE_TYPE,
-    scope: import.meta.env.VITE_OAUTH_SCOPE,
-    state: import.meta.env.VITE_OAUTH_STATE,
-}
+  clientId: import.meta.env.VITE_OAUTH_CLIENT_ID,
+  clientSecret: import.meta.env.VITE_OAUTH_CLIENT_SECRET,
+  redirectUri: import.meta.env.VITE_OAUTH_REDIRECT_URI,
+  responseType: import.meta.env.VITE_OAUTH_RESPONSE_TYPE,
+  scope: import.meta.env.VITE_OAUTH_SCOPE,
+  state: import.meta.env.VITE_OAUTH_STATE,
+};
 
 /**
  * Get OAuth authorization URL
  */
-export async function getOAuthUrl(): Promise<OAuthUrlResponse> {
+export const getOAuthUrlAPI = async (): Promise<OAuthUrlResponse> => {
+  // eslint-disable-next-line no-useless-catch
+  try {
     const params = new URLSearchParams({
-        client_id: ENV.clientId,
-        redirect_uri: ENV.redirectUri,
-        response_type: ENV.responseType,
-        scope: ENV.scope,
-        state: ENV.state,
-    })
+      client_id: ENV.clientId,
+      redirect_uri: ENV.redirectUri,
+      response_type: ENV.responseType,
+      scope: ENV.scope,
+      state: ENV.state,
+    });
 
-    const response = await fetch(
-        `${import.meta.env.VITE_PUBLIC_URL}/oauth/authorize?${params.toString()}`
-    )
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch OAuth URL')
-    }
-
-    return response.json()
-}
+    const response = await $fetch.get(`/oauth/authorize?${params.toString()}`);
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+};
 
 /**
  * Exchange authorization code for access token
  */
-export async function exchangeToken(code: string): Promise<OAuthTokenResponse> {
+export const exchangeTokenAPI = async (code: string): Promise<OAuthTokenResponse> => {
+  // eslint-disable-next-line no-useless-catch
+  try {
     const payload = new URLSearchParams({
-        code,
-        client_id: ENV.clientId,
-        client_secret: ENV.clientSecret,
-        redirect_uri: ENV.redirectUri,
-        grant_type: 'authorization_code',
-    })
+      code,
+      client_id: ENV.clientId,
+      client_secret: ENV.clientSecret,
+      redirect_uri: ENV.redirectUri,
+      grant_type: "authorization_code",
+    });
 
-    const data = await apiPostPublic<OAuthTokenResponse>('/oauth/token', payload)
+    const response = await $fetch.postURLEncoded("/oauth/token", payload);
 
-    // Store the access token
-    if (data.accessToken) {
-        setAccessToken(data.accessToken)
+    // Store tokens in localStorage
+    if (response.data.access_token) {
+      localStorage.setItem("access_token", response.data.access_token);
+    }
+    if (response.data.refresh_token) {
+      localStorage.setItem("refresh_token", response.data.refresh_token);
+    }
+    if (response.data.user) {
+      localStorage.setItem("user", JSON.stringify(response.data.user));
     }
 
-    return data
-}
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+};
 
 /**
  * Validate current access token
  */
-export async function validateToken(): Promise<{ valid: boolean; user?: unknown }> {
-    try {
-        const user = await apiGet('/oauth/protected1')
-        return { valid: true, user }
-    } catch {
-        return { valid: false }
+export const validateTokenAPI = async (): Promise<ValidateTokenResponse> => {
+  try {
+    const response = await $fetch.get("/oauth/protected1");
+    return { valid: true, user: response.data };
+  } catch (err) {
+    return { valid: false };
+  }
+};
+
+/**
+ * Refresh access token
+ */
+export const refreshTokenAPI = async (): Promise<OAuthTokenResponse> => {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const refreshToken = localStorage.getItem("refresh_token");
+    if (!refreshToken) {
+      throw new Error("No refresh token available");
     }
-}
+
+    const response = await $fetch.post("/oauth/refresh-token", {
+      refresh_token: refreshToken,
+    });
+
+    // Update access token
+    if (response.data.access_token) {
+      localStorage.setItem("access_token", response.data.access_token);
+    }
+
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Logout user
+ */
+export const logoutAPI = async (): Promise<void> => {
+  try {
+    await $fetch.post("/oauth/logout");
+  } catch (err) {
+    // Continue with local logout even if API call fails
+    console.error("Logout API error:", err);
+  } finally {
+    // Clear local storage
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user");
+    
+    // Clear indexedDB
+    indexedDB.databases().then((databases) => {
+      databases.forEach((db) => {
+        if (db.name) indexedDB.deleteDatabase(db.name);
+      });
+    });
+  }
+};
 
 /**
  * Redirect to OAuth login
  */
-export async function initiateOAuthLogin(): Promise<void> {
-    const data = await getOAuthUrl()
-    if (data?.url) {
-        window.location.href = data.url
+export const initiateOAuthLoginAPI = async (): Promise<void> => {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const data = await getOAuthUrlAPI();
+    if (data.url) {
+      window.location.href = data.url;
     }
-}
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Get current user info
+ */
+export const getCurrentUserAPI = async () => {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const response = await $fetch.get("/oauth/me");
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};

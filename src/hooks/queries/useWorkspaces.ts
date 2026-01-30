@@ -3,8 +3,8 @@
 // ========================================
 
 import { useQuery } from '@tanstack/react-query'
-import { fetchWorkspaces } from '@/services/api'
 import type { Workspace } from '@/types'
+import { fetchWorkspacesAPI } from '@/services/api'
 
 export const WORKSPACES_QUERY_KEY = ['workspaces']
 
@@ -16,7 +16,7 @@ export function useWorkspaces() {
     return useQuery({
         queryKey: WORKSPACES_QUERY_KEY,
         queryFn: async () => {
-            const response = await fetchWorkspaces()
+            const response = await fetchWorkspacesAPI()
             return response.data
         },
     })

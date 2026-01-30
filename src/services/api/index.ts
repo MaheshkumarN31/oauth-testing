@@ -1,6 +1,18 @@
+// ========================================
 // API Service Barrel Export
-export * from './client'
-export * from './auth'
-export * from './workspaces'
-export * from './documents'
-export * from './templates'
+// ========================================
+
+// Core fetch service
+export { $fetch, $fetchResponse } from "./fetch";
+
+// Authentication APIs
+export * from "./auth";
+
+// Workspace APIs
+export * from "./workspaces";
+
+// Document APIs
+export * from "./documents";
+
+// Template APIs
+export * from "./templates";
