@@ -48,7 +48,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar
-        workspaces={workspaces || []}
+        workspaces={Array.isArray(workspaces) ? workspaces : workspaces?.data || []}
         selectedWorkspace={selectedWorkspace}
         setSelectedWorkspace={setSelectedWorkspace}
       />
@@ -56,7 +56,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         {children({
           selectedWorkspace,
           setSelectedWorkspace,
-          workspaces: workspaces || [],
+          workspaces: Array.isArray(workspaces) ? workspaces : workspaces?.data || [],
         })}
       </SidebarInset>
     </SidebarProvider>

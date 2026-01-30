@@ -26,13 +26,11 @@ function CallbackPage() {
   useEffect(() => {
     if (data?.access_token) {
       console.log('✅ Token saved:', data.access_token)
-      setTimeout(() => {
-        navigate({
-          to: '/dashboard',
-          search: { user_id: data.user?._id || '' },
-          replace: true,
-        })
-      }, 1000)
+      navigate({
+        to: '/dashboard',
+        search: { user_id: data.user?._id || '' },
+        replace: true,
+      })
     }
   }, [data, navigate])
 

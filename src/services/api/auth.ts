@@ -79,7 +79,16 @@ export const exchangeToken = async (
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const data = await response.json()
+    const rawData = await response.json()
+
+    // Normalize data to match OAuthTokenResponse interface (snake_case)
+    const data: OAuthTokenResponse = {
+      access_token: rawData.access_token || rawData.accessToken,
+      refresh_token: rawData.refresh_token || rawData.refreshToken,
+      token_type: rawData.token_type || rawData.tokenType,
+      expires_in: rawData.expires_in || rawData.expiresIn,
+      user: rawData.user
+    }
 
     // Store tokens in localStorage
     if (data.access_token) {

@@ -49,7 +49,7 @@ export function WorkspaceComboBox({
           <CommandInput placeholder="Search workspaces..." />
           <CommandEmpty>No workspace found.</CommandEmpty>
           <CommandGroup>
-            {allWorkspaces.map((workspace) => (
+            {(Array.isArray(allWorkspaces) ? allWorkspaces : []).map((workspace) => (
               <CommandItem
                 key={workspace._id}
                 value={workspace.name}
@@ -112,7 +112,7 @@ export function WorkspaceSidebarSelector({
           <CommandInput placeholder="Search workspaces..." className="h-9" />
           <CommandEmpty>No workspace found.</CommandEmpty>
           <CommandGroup className="max-h-[300px] overflow-auto">
-            {allWorkspaces.map((workspace) => (
+            {(Array.isArray(allWorkspaces) ? allWorkspaces : []).map((workspace) => (
               <CommandItem
                 key={workspace._id}
                 value={workspace.name}

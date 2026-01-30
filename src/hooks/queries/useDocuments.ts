@@ -39,7 +39,7 @@ export function useDocuments({
 export function calculateDocumentStats(
   documents: Array<{ document_status: string }> | undefined,
 ) {
-  if (!documents) {
+  if (!Array.isArray(documents)) {
     return { total: 0, pending: 0, completed: 0, draft: 0 }
   }
 

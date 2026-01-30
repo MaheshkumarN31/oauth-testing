@@ -132,7 +132,7 @@ const Dashboard = () => {
     {
       title: 'Pending',
       value:
-        documentsData?.data?.filter(
+        (Array.isArray(documentsData?.data) ? documentsData.data : []).filter(
           (d: any) => d.document_status === 'INPROGRESS',
         ).length || 0,
       icon: Clock,
@@ -141,7 +141,7 @@ const Dashboard = () => {
     {
       title: 'Completed',
       value:
-        documentsData?.data?.filter(
+        (Array.isArray(documentsData?.data) ? documentsData.data : []).filter(
           (d: any) => d.document_status === 'COMPLETED',
         ).length || 0,
       icon: CheckCircle2,
@@ -150,7 +150,7 @@ const Dashboard = () => {
     {
       title: 'Draft',
       value:
-        documentsData?.data?.filter((d: any) => d.document_status === 'DRAFT')
+        (Array.isArray(documentsData?.data) ? documentsData.data : []).filter((d: any) => d.document_status === 'DRAFT')
           .length || 0,
       icon: AlertCircle,
       color: 'bg-gradient-to-br from-slate-500 to-gray-600',
