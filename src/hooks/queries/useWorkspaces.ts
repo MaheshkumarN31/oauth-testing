@@ -13,18 +13,20 @@ export const WORKSPACES_QUERY_KEY = ['workspaces']
  * Replaces duplicated useQuery logic from dashboard.tsx, templates.tsx, addTemplateRecipients.tsx
  */
 export function useWorkspaces() {
-    return useQuery({
-        queryKey: WORKSPACES_QUERY_KEY,
-        queryFn: async () => {
-            const response = await fetchWorkspacesAPI()
-            return response.data
-        },
-    })
+  return useQuery({
+    queryKey: WORKSPACES_QUERY_KEY,
+    queryFn: async () => {
+      const response = await fetchWorkspacesAPI()
+      return response.data
+    },
+  })
 }
 
 /**
  * Get the first workspace as default
  */
-export function getDefaultWorkspace(workspaces: Array<Workspace> | undefined): Workspace | null {
-    return workspaces?.[0] ?? null
+export function getDefaultWorkspace(
+  workspaces: Array<Workspace> | undefined,
+): Workspace | null {
+  return workspaces?.[0] ?? null
 }

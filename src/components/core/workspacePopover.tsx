@@ -1,6 +1,6 @@
 import { Building2, Check, ChevronsUpDown } from 'lucide-react'
 import { useState } from 'react'
-import type { Workspace } from '../dashboard'
+import type { Workspace } from '@/types'
 import {
   Popover,
   PopoverContent,

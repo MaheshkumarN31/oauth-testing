@@ -21,24 +21,7 @@ import { Badge } from '@/components/ui/badge'
 
 import { Input } from '@/components/ui/input'
 
-export interface Workspace {
-  _id: string
-  name: string
-  type: string
-  status: string
-  user_id: string
-  application_theme: string
-  created_at: Date
-  updated_at: Date
-  plan_type: string
-  is_owner: boolean
-  user_types: Array<UserType>
-}
-
-export interface UserType {
-  user_type_id: string
-  user_type_name: string
-}
+import type { Workspace } from '@/types'
 
 const Dashboard = () => {
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
@@ -87,8 +70,7 @@ const Dashboard = () => {
       if (!token) throw new Error('No access token found')
 
       const res = await fetch(
-        `${import.meta.env.VITE_PUBLIC_URL}/api/company-document-responses-v2?company_id=${company_id}&page=${
-          pageIndex + 1
+        `${import.meta.env.VITE_PUBLIC_URL}/api/company-document-responses-v2?company_id=${company_id}&page=${pageIndex + 1
         }&limit=${pageSize}`,
         {
           headers: {

@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { FileText, Plus, Upload, Loader2 } from 'lucide-react'
+import { FileText, Loader2, Plus, Upload } from 'lucide-react'
+import { FileUploadZone } from './FileUploadZone'
+import type { FileUploadStatus } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,18 +15,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { FileUploadZone } from './FileUploadZone'
-import { getPresignedUrls, uploadMultipleFiles } from '@/services/api'
-import type { FileUploadStatus } from '@/types'
+import { getPresignedUrlsAPI, uploadMultipleFilesAPI } from '@/services/api'
 
 interface CreateTemplateDialogProps {
   companyId: string | undefined
   userId: string
 }
 
-/**
- * Dialog for creating new templates with file upload
- */
 export function CreateTemplateDialog({
   companyId,
   userId,
@@ -87,22 +84,25 @@ export function CreateTemplateDialog({
 
     try {
       const filenames = selectedFiles.map((file) => file.name)
-      const presignedData = await getPresignedUrls(filenames, companyId)
+      const presignedData = await getPresignedUrlsAPI({
+        filenames,
+        company_id: companyId,
+      })
       const { upload_urls, doc_paths } = presignedData.data || {}
 
       if (!upload_urls || upload_urls.length !== selectedFiles.length) {
         throw new Error('Invalid response from presigned URL API')
       }
 
-      const results = await uploadMultipleFiles(
-        selectedFiles,
-        upload_urls,
-        (index, status) => {
+      const results = await uploadMultipleFilesAPI({
+        files: selectedFiles,
+        uploadUrls: upload_urls,
+        onProgress: ({ index, status }) => {
           setUploadStatuses((prev) =>
             prev.map((s, i) => (i === index ? { ...s, status } : s)),
           )
         },
-      )
+      })
 
       const successfulUploads = results.filter((r) => r.success)
 
@@ -161,7 +161,6 @@ export function CreateTemplateDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4 flex-1 overflow-auto">
-          {/* Template Name Input */}
           <div className="space-y-2">
             <Label htmlFor="templateName" className="text-sm font-medium">
               Template Name
@@ -176,7 +175,6 @@ export function CreateTemplateDialog({
             />
           </div>
 
-          {/* File Upload Zone */}
           <FileUploadZone
             selectedFiles={selectedFiles}
             uploadStatuses={uploadStatuses}

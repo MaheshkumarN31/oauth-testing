@@ -3,16 +3,16 @@
 // ========================================
 
 // Core fetch service
-export { $fetch, $fetchResponse } from "./fetch";
+export { $fetch, $fetchResponse } from './fetch'
 
 // Authentication APIs
-export * from "./auth";
+export * from './auth'
 
 // Workspace APIs
-export * from "./workspaces";
+export * from './workspaces'
 
 // Document APIs
-export * from "./documents";
+export * from './documents'
 
 // Template APIs
-export * from "./templates";
+export * from './templates'

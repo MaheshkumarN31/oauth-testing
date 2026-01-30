@@ -16,6 +16,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '../layout/AppSidebar'
+import type { Recipient, Workspace } from '@/types'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -30,38 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-export interface Workspace {
-  _id: string
-  name: string
-  type: string
-  status: string
-  user_id: string
-  application_theme: string
-  created_at: Date
-  updated_at: Date
-  plan_type: string
-  is_owner: boolean
-  user_types: Array<UserType>
-}
-
-export interface UserType {
-  user_type_id: string
-  user_type_name: string
-}
-
-interface Recipient {
-  id: string
-  name: string
-  role: 'signer' | 'approver' | 'viewer' | 'cc'
-  email?: string
-}
-
-const roleOptions = [
-  { value: 'signer', label: 'Signer' },
-  { value: 'approver', label: 'Approver' },
-  { value: 'viewer', label: 'Viewer' },
-  { value: 'cc', label: 'CC' },
-]
+import { ROLE_OPTIONS } from '@/types'
 
 const AddTemplateRecipients = () => {
   const searchParams = new URLSearchParams(window.location.search)
@@ -285,7 +255,7 @@ const AddTemplateRecipients = () => {
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent>
-                        {roleOptions.map((option) => (
+                        {ROLE_OPTIONS.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>

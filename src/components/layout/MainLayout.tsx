@@ -6,11 +6,11 @@ import { useWorkspaces, getDefaultWorkspace } from '@/hooks/queries'
 import type { Workspace } from '@/types'
 
 interface MainLayoutProps {
-    children: (props: {
-        selectedWorkspace: Workspace | null
-        setSelectedWorkspace: (workspace: Workspace) => void
-        workspaces: Array<Workspace>
-    }) => ReactNode
+  children: (props: {
+    selectedWorkspace: Workspace | null
+    setSelectedWorkspace: (workspace: Workspace) => void
+    workspaces: Array<Workspace>
+  }) => ReactNode
 }
 
 /**
@@ -18,47 +18,49 @@ interface MainLayoutProps {
  * Provides workspace context to child components
  */
 export function MainLayout({ children }: MainLayoutProps) {
-    const { data: workspaces, isLoading, isError, refetch } = useWorkspaces()
-    const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
+  const { data: workspaces, isLoading, isError, refetch } = useWorkspaces()
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
+    null,
+  )
 
-    // Set default workspace when data loads
-    useEffect(() => {
-        if (workspaces && !selectedWorkspace) {
-            setSelectedWorkspace(getDefaultWorkspace(workspaces))
-        }
-    }, [workspaces, selectedWorkspace])
-
-    if (isLoading) {
-        return <LoadingSpinner fullScreen message="Loading workspaces..." />
+  // Set default workspace when data loads
+  useEffect(() => {
+    if (workspaces && !selectedWorkspace) {
+      setSelectedWorkspace(getDefaultWorkspace(workspaces))
     }
+  }, [workspaces, selectedWorkspace])
 
-    if (isError) {
-        return (
-            <ErrorState
-                fullScreen
-                title="Failed to load workspaces"
-                message="Please check your connection and try again"
-                onRetry={() => refetch()}
-            />
-        )
-    }
+  if (isLoading) {
+    return <LoadingSpinner fullScreen message="Loading workspaces..." />
+  }
 
+  if (isError) {
     return (
-        <SidebarProvider>
-            <AppSidebar
-                workspaces={workspaces || []}
-                selectedWorkspace={selectedWorkspace}
-                setSelectedWorkspace={setSelectedWorkspace}
-            />
-            <SidebarInset>
-                {children({
-                    selectedWorkspace,
-                    setSelectedWorkspace,
-                    workspaces: workspaces || [],
-                })}
-            </SidebarInset>
-        </SidebarProvider>
+      <ErrorState
+        fullScreen
+        title="Failed to load workspaces"
+        message="Please check your connection and try again"
+        onRetry={() => refetch()}
+      />
     )
+  }
+
+  return (
+    <SidebarProvider>
+      <AppSidebar
+        workspaces={workspaces || []}
+        selectedWorkspace={selectedWorkspace}
+        setSelectedWorkspace={setSelectedWorkspace}
+      />
+      <SidebarInset>
+        {children({
+          selectedWorkspace,
+          setSelectedWorkspace,
+          workspaces: workspaces || [],
+        })}
+      </SidebarInset>
+    </SidebarProvider>
+  )
 }
 
 export default MainLayout

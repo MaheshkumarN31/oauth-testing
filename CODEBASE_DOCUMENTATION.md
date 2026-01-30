@@ -19,6 +19,7 @@
 ## Project Overview
 
 This is a React application built with:
+
 - **Vite** - Build tool and dev server
 - **TanStack Router** - File-based routing
 - **TanStack React Query** - Server state management
@@ -27,6 +28,7 @@ This is a React application built with:
 - **Radix UI** - Accessible UI primitives
 
 The app implements OAuth 2.0 authentication flow and provides:
+
 - Dashboard with document statistics
 - Templates management with file upload
 - Workspace switching
@@ -97,22 +99,22 @@ This file contains all shared TypeScript interfaces and types used throughout th
 // ========================================
 
 export interface Workspace {
-  _id: string                    // MongoDB ObjectID
-  name: string                   // Display name ("Acme Corp")
-  type: string                   // Workspace type ("business", "personal")
-  status: string                 // Active/inactive status
-  user_id: string               // Owner's user ID
-  application_theme: string     // UI theme preference
-  created_at: Date              // Creation timestamp
-  updated_at: Date              // Last update timestamp
-  plan_type: string             // Subscription plan
-  is_owner: boolean             // Whether current user owns this workspace
-  user_types: Array<UserType>   // Available user roles in workspace
+  _id: string // MongoDB ObjectID
+  name: string // Display name ("Acme Corp")
+  type: string // Workspace type ("business", "personal")
+  status: string // Active/inactive status
+  user_id: string // Owner's user ID
+  application_theme: string // UI theme preference
+  created_at: Date // Creation timestamp
+  updated_at: Date // Last update timestamp
+  plan_type: string // Subscription plan
+  is_owner: boolean // Whether current user owns this workspace
+  user_types: Array<UserType> // Available user roles in workspace
 }
 
 export interface UserType {
-  user_type_id: string          // Role identifier
-  user_type_name: string        // Role display name ("Admin", "Member")
+  user_type_id: string // Role identifier
+  user_type_name: string // Role display name ("Admin", "Member")
 }
 ```
 
@@ -130,16 +132,16 @@ export interface Document {
   created_at: string
   updated_at: string
   company_id: string
-  sender_name?: string          // Optional - only in some views
-  recipient_count?: number      // Optional
+  sender_name?: string // Optional - only in some views
+  recipient_count?: number // Optional
 }
 
 // API response wrapper for paginated documents
 export interface DocumentsResponse {
-  data: Array<Document>         // Array of documents
-  total: number                 // Total count for pagination
-  page: number                  // Current page number
-  limit: number                 // Items per page
+  data: Array<Document> // Array of documents
+  total: number // Total count for pagination
+  page: number // Current page number
+  limit: number // Items per page
 }
 ```
 
@@ -152,10 +154,10 @@ export interface DocumentsResponse {
 export type RecipientRole = 'signer' | 'approver' | 'viewer' | 'cc'
 
 export interface Recipient {
-  id: string                    // Client-generated unique ID
-  name: string                  // Display name
-  role: RecipientRole           // One of the defined roles
-  email?: string                // Optional email
+  id: string // Client-generated unique ID
+  name: string // Display name
+  role: RecipientRole // One of the defined roles
+  email?: string // Optional email
 }
 
 // Constant for role dropdown options
@@ -177,10 +179,10 @@ export const ROLE_OPTIONS: Array<{ value: RecipientRole; label: string }> = [
 export type FileUploadStatusType = 'pending' | 'uploading' | 'success' | 'error'
 
 export interface FileUploadStatus {
-  file: File                    // Browser File object
-  status: FileUploadStatusType  // Current upload state
-  progress?: number             // Optional 0-100 progress
-  error?: string                // Error message if failed
+  file: File // Browser File object
+  status: FileUploadStatusType // Current upload state
+  progress?: number // Optional 0-100 progress
+  error?: string // Error message if failed
 }
 ```
 
@@ -191,21 +193,21 @@ export interface FileUploadStatus {
 
 // Generic wrapper for API responses
 export interface ApiResponse<T> {
-  data: T                       // The actual payload
-  message?: string              // Optional message
-  success?: boolean             // Success indicator
+  data: T // The actual payload
+  message?: string // Optional message
+  success?: boolean // Success indicator
 }
 
 // S3 presigned URL response
 export interface PresignedUrlResponse {
-  upload_urls: Array<string>    // URLs to PUT files to
-  doc_paths: Array<string>      // Paths where files will be stored
+  upload_urls: Array<string> // URLs to PUT files to
+  doc_paths: Array<string> // Paths where files will be stored
 }
 
 // OAuth token exchange response
 export interface OAuthTokenResponse {
-  accessToken: string           // JWT access token
-  refreshToken?: string         // Optional refresh token
+  accessToken: string // JWT access token
+  refreshToken?: string // Optional refresh token
   user: {
     _id: string
     email: string
@@ -266,7 +268,7 @@ function getAuthHeaders(): HeadersInit {
 // Custom error class with HTTP status
 export class ApiError extends Error {
   status: number
-  
+
   constructor(message: string, status: number) {
     super(message)
     this.name = 'ApiError'
@@ -291,17 +293,20 @@ export async function apiGet<T>(endpoint: string): Promise<T> {
   })
 
   if (!response.ok) {
-    throw new ApiError(`Request failed: ${response.statusText}`, response.status)
+    throw new ApiError(
+      `Request failed: ${response.statusText}`,
+      response.status,
+    )
   }
 
-  return response.json()  // Parse JSON and cast to type T
+  return response.json() // Parse JSON and cast to type T
 }
 
 // POST request with authentication
 export async function apiPost<T>(
-  endpoint: string, 
-  body: unknown,              // Accept any body shape
-  options?: { contentType?: string }
+  endpoint: string,
+  body: unknown, // Accept any body shape
+  options?: { contentType?: string },
 ): Promise<T> {
   const token = getAccessToken()
   if (!token) throw new ApiError('No access token found', 401)
@@ -316,7 +321,10 @@ export async function apiPost<T>(
   })
 
   if (!response.ok) {
-    throw new ApiError(`Request failed: ${response.statusText}`, response.status)
+    throw new ApiError(
+      `Request failed: ${response.statusText}`,
+      response.status,
+    )
   }
 
   return response.json()
@@ -326,7 +334,7 @@ export async function apiPost<T>(
 export async function apiPostPublic<T>(
   endpoint: string,
   body: URLSearchParams | string,
-  contentType: string = 'application/x-www-form-urlencoded'
+  contentType: string = 'application/x-www-form-urlencoded',
 ): Promise<T> {
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     method: 'POST',
@@ -343,12 +351,12 @@ export async function apiPostPublic<T>(
 // Direct S3 upload using presigned URL
 export async function uploadToPresignedUrl(
   presignedUrl: string,
-  file: File
+  file: File,
 ): Promise<boolean> {
   const response = await fetch(presignedUrl, {
-    method: 'PUT',              // S3 presigned URLs use PUT
-    body: file,                 // File object as raw body
-    mode: 'cors',               // Cross-origin request to S3
+    method: 'PUT', // S3 presigned URLs use PUT
+    body: file, // File object as raw body
+    mode: 'cors', // Cross-origin request to S3
   })
 
   if (!response.ok) {
@@ -390,40 +398,43 @@ export async function getOAuthUrl(): Promise<OAuthUrlResponse> {
   })
 
   const response = await fetch(
-    `${import.meta.env.VITE_PUBLIC_URL}/oauth/authorize?${params.toString()}`
+    `${import.meta.env.VITE_PUBLIC_URL}/oauth/authorize?${params.toString()}`,
   )
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch OAuth URL')
   }
-  
+
   return response.json()
 }
 
 // Step 2: Exchange authorization code for tokens
 export async function exchangeToken(code: string): Promise<OAuthTokenResponse> {
   const payload = new URLSearchParams({
-    code,                                   // From OAuth redirect
+    code, // From OAuth redirect
     client_id: ENV.clientId,
     client_secret: ENV.clientSecret,
     redirect_uri: ENV.redirectUri,
-    grant_type: 'authorization_code',       // OAuth 2.0 grant type
+    grant_type: 'authorization_code', // OAuth 2.0 grant type
   })
 
   const data = await apiPostPublic<OAuthTokenResponse>('/oauth/token', payload)
-  
+
   // Automatically store the token
   if (data.accessToken) {
     setAccessToken(data.accessToken)
   }
-  
+
   return data
 }
 
 // Validate that current token is still valid
-export async function validateToken(): Promise<{ valid: boolean; user?: unknown }> {
+export async function validateToken(): Promise<{
+  valid: boolean
+  user?: unknown
+}> {
   try {
-    const user = await apiGet('/oauth/protected1')  // Protected endpoint
+    const user = await apiGet('/oauth/protected1') // Protected endpoint
     return { valid: true, user }
   } catch {
     return { valid: false }
@@ -434,12 +445,13 @@ export async function validateToken(): Promise<{ valid: boolean; user?: unknown 
 export async function initiateOAuthLogin(): Promise<void> {
   const data = await getOAuthUrl()
   if (data?.url) {
-    window.location.href = data.url  // Redirect to OAuth provider
+    window.location.href = data.url // Redirect to OAuth provider
   }
 }
 ```
 
 **OAuth Flow**:
+
 1. User clicks "Login" → `initiateOAuthLogin()`
 2. Browser redirects to OAuth provider
 3. User logs in, provider redirects to `/callback?code=xxx`
@@ -455,7 +467,9 @@ import { apiGet } from './client'
 import type { Workspace, ApiResponse } from '@/types'
 
 // Fetch all workspaces user has access to
-export async function fetchWorkspaces(): Promise<ApiResponse<Array<Workspace>>> {
+export async function fetchWorkspaces(): Promise<
+  ApiResponse<Array<Workspace>>
+> {
   return apiGet<ApiResponse<Array<Workspace>>>('/api/workspaces/')
 }
 ```
@@ -472,11 +486,11 @@ import type { DocumentsResponse } from '@/types'
 
 export async function fetchDocuments(
   companyId: string,
-  page: number = 1,          // Default to first page
-  limit: number = 10         // Default 10 items per page
+  page: number = 1, // Default to first page
+  limit: number = 10, // Default 10 items per page
 ): Promise<DocumentsResponse> {
   return apiGet<DocumentsResponse>(
-    `/api/company-document-responses-v2?company_id=${companyId}&page=${page}&limit=${limit}`
+    `/api/company-document-responses-v2?company_id=${companyId}&page=${page}&limit=${limit}`,
   )
 }
 ```
@@ -487,34 +501,38 @@ export async function fetchDocuments(
 
 ```typescript
 import { apiGet, apiPost, uploadToPresignedUrl } from './client'
-import type { TemplatesResponse, ApiResponse, PresignedUrlResponse } from '@/types'
+import type {
+  TemplatesResponse,
+  ApiResponse,
+  PresignedUrlResponse,
+} from '@/types'
 
 // Get templates list
 export async function fetchTemplates(
   companyId: string,
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<TemplatesResponse> {
   return apiGet<TemplatesResponse>(
-    `/api/company-document-responses-v2?company_id=${companyId}&page=${page}&limit=${limit}`
+    `/api/company-document-responses-v2?company_id=${companyId}&page=${page}&limit=${limit}`,
   )
 }
 
 // Get S3 presigned URLs for file upload
 export async function getPresignedUrls(
   filenames: Array<string>,
-  companyId: string
+  companyId: string,
 ): Promise<ApiResponse<PresignedUrlResponse>> {
   return apiPost<ApiResponse<PresignedUrlResponse>>(
     '/api/documents-templates/processed-files',
-    { filenames, company_id: companyId }
+    { filenames, company_id: companyId },
   )
 }
 
 // Upload single file to S3
 export async function uploadFileToS3(
   file: File,
-  presignedUrl: string
+  presignedUrl: string,
 ): Promise<boolean> {
   return uploadToPresignedUrl(presignedUrl, file)
 }
@@ -523,21 +541,24 @@ export async function uploadFileToS3(
 export async function uploadMultipleFiles(
   files: Array<File>,
   uploadUrls: Array<string>,
-  onProgress?: (index: number, status: 'uploading' | 'success' | 'error') => void
+  onProgress?: (
+    index: number,
+    status: 'uploading' | 'success' | 'error',
+  ) => void,
 ): Promise<Array<{ success: boolean; error?: string }>> {
   // Upload all files in parallel
   const results = await Promise.all(
     files.map(async (file, index) => {
-      onProgress?.(index, 'uploading')        // Notify upload started
+      onProgress?.(index, 'uploading') // Notify upload started
       try {
         await uploadFileToS3(file, uploadUrls[index])
-        onProgress?.(index, 'success')        // Notify success
+        onProgress?.(index, 'success') // Notify success
         return { success: true }
       } catch (error) {
-        onProgress?.(index, 'error')          // Notify failure
+        onProgress?.(index, 'error') // Notify failure
         return { success: false, error: (error as Error).message }
       }
-    })
+    }),
   )
   return results
 }
@@ -561,21 +582,24 @@ export const WORKSPACES_QUERY_KEY = ['workspaces']
 
 export function useWorkspaces() {
   return useQuery({
-    queryKey: WORKSPACES_QUERY_KEY,   // Cache key - same key = same cache
+    queryKey: WORKSPACES_QUERY_KEY, // Cache key - same key = same cache
     queryFn: async () => {
       const response = await fetchWorkspaces()
-      return response.data             // Unwrap the ApiResponse
+      return response.data // Unwrap the ApiResponse
     },
   })
 }
 
 // Helper to get first workspace as default
-export function getDefaultWorkspace(workspaces: Array<Workspace> | undefined): Workspace | null {
-  return workspaces?.[0] ?? null       // First item or null
+export function getDefaultWorkspace(
+  workspaces: Array<Workspace> | undefined,
+): Workspace | null {
+  return workspaces?.[0] ?? null // First item or null
 }
 ```
 
 **What React Query provides**:
+
 - `data` - The fetched data
 - `isLoading` - First load in progress
 - `isFetching` - Any fetch in progress
@@ -599,20 +623,27 @@ interface UseDocumentsOptions {
   enabled?: boolean
 }
 
-export function useDocuments({ companyId, page, pageSize, enabled = true }: UseDocumentsOptions) {
+export function useDocuments({
+  companyId,
+  page,
+  pageSize,
+  enabled = true,
+}: UseDocumentsOptions) {
   return useQuery({
     // Query key includes pagination params for separate caches per page
     queryKey: [DOCUMENTS_QUERY_KEY, companyId, page, pageSize],
     queryFn: async () => {
       if (!companyId) throw new Error('No company ID provided')
-      return fetchDocuments(companyId, page + 1, pageSize)  // API is 1-indexed
+      return fetchDocuments(companyId, page + 1, pageSize) // API is 1-indexed
     },
-    enabled: enabled && !!companyId,   // Don't fetch if no company selected
+    enabled: enabled && !!companyId, // Don't fetch if no company selected
   })
 }
 
 // Calculate stats from document array
-export function calculateDocumentStats(documents: Array<{ document_status: string }> | undefined) {
+export function calculateDocumentStats(
+  documents: Array<{ document_status: string }> | undefined,
+) {
   if (!documents) {
     return { total: 0, pending: 0, completed: 0, draft: 0 }
   }
@@ -620,7 +651,8 @@ export function calculateDocumentStats(documents: Array<{ document_status: strin
   return {
     total: documents.length,
     pending: documents.filter((d) => d.document_status === 'INPROGRESS').length,
-    completed: documents.filter((d) => d.document_status === 'COMPLETED').length,
+    completed: documents.filter((d) => d.document_status === 'COMPLETED')
+      .length,
     draft: documents.filter((d) => d.document_status === 'DRAFT').length,
   }
 }
@@ -781,10 +813,10 @@ export function PageHeader({
         {/* Hamburger menu for sidebar */}
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
-        
+
         {/* Optional prefix (e.g., back button) */}
         {prefix}
-        
+
         <div className="flex items-center gap-2">
           {/* Render icon if provided */}
           {Icon && <Icon className="h-5 w-5 text-indigo-500" />}
@@ -887,7 +919,7 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   // Fetch workspaces using shared hook
   const { data: workspaces, isLoading, isError, refetch } = useWorkspaces()
-  
+
   // Local state for selected workspace
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
 
@@ -939,6 +971,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 **Render Props Pattern**: Instead of passing children as elements, we pass a function that receives props. This allows the layout to share state with its content without prop drilling.
 
 Usage:
+
 ```tsx
 <MainLayout>
   {({ selectedWorkspace }) => (
@@ -1051,6 +1084,7 @@ export function DashboardContent({ selectedWorkspace }: DashboardContentProps) {
 Dialog for creating templates with file upload (summarized - full file is ~200 lines).
 
 Key parts:
+
 ```typescript
 export function CreateTemplateDialog({ companyId, userId }: CreateTemplateDialogProps) {
   // Dialog state
@@ -1063,7 +1097,7 @@ export function CreateTemplateDialog({ companyId, userId }: CreateTemplateDialog
   const handleCreateTemplate = async () => {
     // 1. Get presigned URLs from server
     const presignedData = await getPresignedUrls(filenames, companyId)
-    
+
     // 2. Upload files to S3 in parallel
     const results = await uploadMultipleFiles(
       selectedFiles,
@@ -1075,7 +1109,7 @@ export function CreateTemplateDialog({ companyId, userId }: CreateTemplateDialog
         )
       }
     )
-    
+
     // 3. Navigate to recipient editor
     window.location.href = `/templates_/add-recipients?...`
   }
@@ -1099,7 +1133,7 @@ export function CreateTemplateDialog({ companyId, userId }: CreateTemplateDialog
 
 ## Route Files (`src/routes/`)
 
-### [__root.tsx](file:///c:/Users/mahes/Desktop/Actanos/oauth-testing/src/routes/__root.tsx)
+### [\_\_root.tsx](file:///c:/Users/mahes/Desktop/Actanos/oauth-testing/src/routes/__root.tsx)
 
 The root layout wrapping all routes.
 
@@ -1245,10 +1279,12 @@ export function cn(...inputs: Array<ClassValue>) {
 ```
 
 **What it does**:
+
 - `clsx`: Conditionally joins class names
 - `twMerge`: Deduplicates conflicting Tailwind classes
 
 Example:
+
 ```typescript
 cn('px-4 py-2', isActive && 'bg-blue-500', 'px-6')
 // Result: 'py-2 px-6 bg-blue-500' (px-6 wins over px-4)

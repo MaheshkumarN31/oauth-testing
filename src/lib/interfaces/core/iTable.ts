@@ -1,20 +1,20 @@
 export interface pageProps {
-  columns: any[];
-  data: any[];
-  loading?: boolean;
-  heightClass?:string;
-  getData?: any;
-  paginationDetails: any;
-  removeSortingForColumnIds?: string[];
-  noDataLabel?:string
+  columns: any[]
+  data: any[]
+  loading?: boolean
+  heightClass?: string
+  getData?: any
+  paginationDetails: any
+  removeSortingForColumnIds?: string[]
+  noDataLabel?: string
 }
 
 export interface DynamicPaginationProps {
-  paginationDetails: any;
+  paginationDetails: any
 
-  totalItems?: number;
-  capturePageNum: (value: number) => void;
-  captureRowPerItems: (value: number) => void;
-  initialPage?: number;
-  limitOptionsFromProps?: { title: string; value: number }[];
+  totalItems?: number
+  capturePageNum: (value: number) => void
+  captureRowPerItems: (value: number) => void
+  initialPage?: number
+  limitOptionsFromProps?: { title: string; value: number }[]
 }

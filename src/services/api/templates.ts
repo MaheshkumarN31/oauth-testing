@@ -94,8 +94,8 @@ export const deleteTemplateAPI = async ({
  * Get presigned URLs for file uploads
  */
 export const getPresignedUrlsAPI = async (payload: {
-  filenames: Array<string>;
-  company_id: string;
+    filenames: Array<string>;
+    company_id: string;
 }): Promise<any> => {
   try {
     const response = await $fetch.post(
@@ -126,13 +126,13 @@ export const uploadFileToS3API = async (
  * Upload multiple files and return results
  */
 export const uploadMultipleFilesAPI = async ({
-  files,
-  uploadUrls,
-  onProgress,
+    files,
+    uploadUrls,
+    onProgress,
 }: {
-  files: Array<File>;
-  uploadUrls: Array<string>;
-  onProgress?: (progress: UploadProgress) => void;
+    files: Array<File>;
+    uploadUrls: Array<string>;
+    onProgress?: (progress: UploadProgress) => void;
 }): Promise<Array<{ success: boolean; error?: string }>> => {
   try {
     const results = await Promise.all(
@@ -291,7 +291,7 @@ export const updateTemplateAPI = async ({
   templateId: string;
   payload: {
     title?: string;
-    document_users?: any[];
+    document_users?: Array<any>;
     [key: string]: any;
   };
 }): Promise<any> => {
@@ -314,9 +314,9 @@ export const createTemplateAPI = async (payload: {
   title: string;
   company_id: string;
   user_id: string;
-  paths: string[];
+  paths: Array<string>;
   files_state: string;
-  document_names: string[];
+  document_names: Array<string>;
   is_template: boolean;
   [key: string]: any;
 }): Promise<any> => {

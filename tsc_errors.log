@@ -1,0 +1,47 @@
+src/components/dashboard.tsx(182,9): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace | null' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace | null'.
+  Property 'id' is missing in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace' but required in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace'.
+src/components/dashboard.tsx(183,9): error TS2322: Type 'Dispatch<SetStateAction<Workspace | null>>' is not assignable to type '(workspace: Workspace) => void'.
+  Types of parameters 'value' and 'workspace' are incompatible.
+    Type 'Workspace' is not assignable to type 'SetStateAction<Workspace | null>'.
+      Type 'Workspace' is missing the following properties from type 'Workspace': _id, type, status, user_id, and 4 more.
+src/components/features/templates/AddRecipientsContent.tsx(1,10): error TS6133: 'useEffect' is declared but its value is never read.
+src/components/features/templates/AddRecipientsContent.tsx(21,15): error TS2305: Module '"@/types"' has no exported member 'Recipient'.
+src/components/features/templates/AddRecipientsContent.tsx(21,26): error TS2305: Module '"@/types"' has no exported member 'RecipientRole'.
+src/components/features/templates/CreateTemplateDialog.tsx(17,10): error TS2724: '"@/services/api"' has no exported member named 'getPresignedUrls'. Did you mean 'getPresignedUrlsAPI'?
+src/components/features/templates/CreateTemplateDialog.tsx(17,28): error TS2724: '"@/services/api"' has no exported member named 'uploadMultipleFiles'. Did you mean 'uploadMultipleFilesAPI'?
+src/components/features/templates/CreateTemplateDialog.tsx(18,15): error TS2305: Module '"@/types"' has no exported member 'FileUploadStatus'.
+src/components/features/templates/CreateTemplateDialog.tsx(100,10): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/components/features/templates/CreateTemplateDialog.tsx(100,17): error TS7006: Parameter 'status' implicitly has an 'any' type.
+src/components/features/templates/CreateTemplateDialog.tsx(107,49): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/components/features/templates/FileUploadZone.tsx(12,15): error TS2305: Module '"@/types"' has no exported member 'FileUploadStatus'.
+src/components/features/templates/FileUploadZone.tsx(12,33): error TS2305: Module '"@/types"' has no exported member 'FileUploadStatusType'.
+src/components/features/templates/RecipientEditor.tsx(2,15): error TS2305: Module '"@/types"' has no exported member 'Recipient'.
+src/components/features/templates/RecipientEditor.tsx(2,26): error TS2305: Module '"@/types"' has no exported member 'RecipientRole'.
+src/components/features/templates/RecipientEditor.tsx(12,10): error TS2305: Module '"@/types"' has no exported member 'ROLE_OPTIONS'.
+src/components/features/templates/RecipientEditor.tsx(138,36): error TS7006: Parameter 'option' implicitly has an 'any' type.
+src/components/layout/AppSidebar.tsx(232,13): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace[]' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace[]'.
+  Type 'Workspace' is missing the following properties from type 'Workspace': _id, type, status, user_id, and 4 more.
+src/components/layout/AppSidebar.tsx(233,13): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace | null' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace | null'.
+  Type 'Workspace' is missing the following properties from type 'Workspace': _id, type, status, user_id, and 4 more.
+src/components/layout/AppSidebar.tsx(234,13): error TS2322: Type '(workspace: import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace) => void' is not assignable to type '(workspace: import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace) => void'.
+  Types of parameters 'workspace' and 'workspace' are incompatible.
+    Property 'id' is missing in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace' but required in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace'.
+src/components/templates/addTemplateRecipients.tsx(173,9): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/templates/addTemplateRecipients").Workspace | null' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace | null'.
+  Property 'id' is missing in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/templates/addTemplateRecipients").Workspace' but required in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace'.
+src/components/templates/addTemplateRecipients.tsx(174,9): error TS2322: Type 'Dispatch<SetStateAction<Workspace | null>>' is not assignable to type '(workspace: Workspace) => void'.
+  Types of parameters 'value' and 'workspace' are incompatible.
+    Type 'Workspace' is not assignable to type 'SetStateAction<Workspace | null>'.
+      Type 'Workspace' is missing the following properties from type 'Workspace': _id, type, status, user_id, and 4 more.
+src/components/templates/templates.tsx(430,9): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/templates/templates").Workspace | null' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace | null'.
+  Property 'id' is missing in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/templates/templates").Workspace' but required in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace'.
+src/components/templates/templates.tsx(431,9): error TS2322: Type 'Dispatch<SetStateAction<Workspace | null>>' is not assignable to type '(workspace: Workspace) => void'.
+  Types of parameters 'value' and 'workspace' are incompatible.
+    Type 'Workspace' is not assignable to type 'SetStateAction<Workspace | null>'.
+      Type 'Workspace' is missing the following properties from type 'Workspace': _id, type, status, user_id, and 4 more.
+src/hooks/queries/useDocuments.ts(6,10): error TS2724: '"@/services/api"' has no exported member named 'fetchDocuments'. Did you mean 'fetchDocumentsAPI'?
+src/hooks/queries/useTemplates.ts(6,10): error TS2724: '"@/services/api"' has no exported member named 'fetchTemplates'. Did you mean 'fetchTemplatesAPI'?
+src/routes/auth-check.tsx(3,10): error TS2724: '"@/services/api"' has no exported member named 'validateToken'. Did you mean 'validateTokenAPI'?
+src/routes/callback.tsx(5,10): error TS2724: '"@/services/api"' has no exported member named 'exchangeToken'. Did you mean 'exchangeTokenAPI'?
+src/routes/signin.tsx(3,10): error TS2724: '"@/services/api"' has no exported member named 'initiateOAuthLogin'. Did you mean 'initiateOAuthLoginAPI'?
+src/services/api/templates.ts(14,11): error TS6196: 'Template' is declared but never used.
+src/services/api/templates.ts(24,11): error TS6196: 'PresignedUrlResponse' is declared but never used.

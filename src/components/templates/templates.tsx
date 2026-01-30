@@ -38,24 +38,7 @@ import {
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
-export interface Workspace {
-  _id: string
-  name: string
-  type: string
-  status: string
-  user_id: string
-  application_theme: string
-  created_at: Date
-  updated_at: Date
-  plan_type: string
-  is_owner: boolean
-  user_types: Array<UserType>
-}
-
-export interface UserType {
-  user_type_id: string
-  user_type_name: string
-}
+import type { Workspace } from '@/types'
 
 interface FileUploadStatus {
   file: File
@@ -120,8 +103,7 @@ const Templates = () => {
       if (!token) throw new Error('No access token found')
 
       const res = await fetch(
-        `${import.meta.env.VITE_PUBLIC_URL}/api/company-document-responses-v2?company_id=${company_id}&page=${
-          pageIndex + 1
+        `${import.meta.env.VITE_PUBLIC_URL}/api/company-document-responses-v2?company_id=${company_id}&page=${pageIndex + 1
         }&limit=${pageSize}`,
         {
           headers: {
@@ -431,7 +413,6 @@ const Templates = () => {
         setSelectedWorkspace={setSelectedWorkspace}
       />
       <SidebarInset>
-        {/* Header */}
         <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
@@ -454,7 +435,6 @@ const Templates = () => {
               />
             </div>
 
-            {/* Create Template Dialog */}
             <Dialog
               open={isDialogOpen}
               onOpenChange={(open) => {
@@ -491,7 +471,6 @@ const Templates = () => {
                 </DialogHeader>
 
                 <div className="space-y-6 py-4 flex-1 overflow-auto">
-                  {/* Template Name Input */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="templateName"
@@ -509,7 +488,6 @@ const Templates = () => {
                     />
                   </div>
 
-                  {/* File Upload Area */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">
@@ -522,7 +500,6 @@ const Templates = () => {
                       )}
                     </div>
 
-                    {/* Dropzone - Hide when uploading */}
                     {!isUploading && (
                       <div
                         onDragOver={handleDragOver}
@@ -575,7 +552,6 @@ const Templates = () => {
                       </div>
                     )}
 
-                    {/* Selected Files List */}
                     {selectedFiles.length > 0 && (
                       <div className="space-y-2 mt-4">
                         <div className="flex items-center justify-between">
@@ -717,9 +693,7 @@ const Templates = () => {
           </div>
         </header>
 
-        {/* Main Content */}
         <div className="flex-1 space-y-6 p-6 overflow-auto">
-          {/* Templates Table */}
           <Card className="border-0 shadow-sm">
             <CardHeader className="h-10">
               <div className="flex items-center justify-between">

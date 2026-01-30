@@ -9,7 +9,9 @@ export const Route = createFileRoute('/auth-check')({
 
 function AuthCheckPage() {
   const navigate = useNavigate()
-  const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>('loading')
+  const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>(
+    'loading',
+  )
 
   useEffect(() => {
     const checkToken = async () => {
@@ -34,8 +36,12 @@ function AuthCheckPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
-      {status === 'loading' && <LoadingSpinner message="🔐 Validating session..." />}
-      {status === 'valid' && <LoadingSpinner message="✅ Access token is valid" />}
+      {status === 'loading' && (
+        <LoadingSpinner message="🔐 Validating session..." />
+      )}
+      {status === 'valid' && (
+        <LoadingSpinner message="✅ Access token is valid" />
+      )}
     </div>
   )
 }

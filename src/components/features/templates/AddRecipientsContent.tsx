@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   AlertCircle,
@@ -94,7 +94,6 @@ export function AddRecipientsContent({
     Record<string, string>
   >({})
 
-  // Fetch contact types
   const { data: contactTypesData, isLoading: isLoadingContactTypes } = useQuery(
     {
       queryKey: ['contactTypes', companyId],
@@ -105,10 +104,9 @@ export function AddRecipientsContent({
 
   const contactTypes: Array<ContactType> = contactTypesData?.data || []
 
-  // Create template mutation
   const createTemplateMutation = useMutation({
     mutationFn: createTemplateAPI,
-    onSuccess: (response) => {
+    onSuccess: (response: any) => {
       return response.data._id
     },
     onError: (error: any) => {
@@ -117,7 +115,6 @@ export function AddRecipientsContent({
     },
   })
 
-  // Update template mutation
   const updateTemplateMutation = useMutation({
     mutationFn: ({
       templateId,
@@ -184,7 +181,6 @@ export function AddRecipientsContent({
     setIsSaving(true)
 
     try {
-      // Step 1: Create template
       const templatePayload = {
         title: editableTemplateName,
         company_id: companyId,
@@ -206,7 +202,6 @@ export function AddRecipientsContent({
         throw new Error('Failed to get template ID')
       }
 
-      // Step 2: Add document users
       const documentUsers = recipients.map((recipient, index) => {
         const contactType = contactTypes.find(
           (ct) => ct.name.toLowerCase() === recipient.role.toLowerCase(),
@@ -292,7 +287,6 @@ export function AddRecipientsContent({
     setRecipients(
       recipients.map((r) => (r.id === id ? { ...r, ...updates } : r)),
     )
-    // Clear validation errors for this field
     if (updates.name !== undefined) {
       const index = recipients.findIndex((r) => r.id === id)
       setValidationErrors((prev) => {
@@ -377,7 +371,6 @@ export function AddRecipientsContent({
       />
 
       <div className="flex-1 space-y-6 p-6 overflow-auto">
-        {/* Template Overview Card */}
         <Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm">
           <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
             <div className="flex items-center gap-3">
@@ -395,7 +388,6 @@ export function AddRecipientsContent({
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
-            {/* Template Name */}
             <div className="space-y-2">
               <Label
                 htmlFor="templateName"
@@ -420,7 +412,6 @@ export function AddRecipientsContent({
               )}
             </div>
 
-            {/* Files Overview */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-slate-700">
                 Attached Files
@@ -452,7 +443,6 @@ export function AddRecipientsContent({
           </CardContent>
         </Card>
 
-        {/* Recipients Card */}
         <Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm">
           <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
             <div className="flex items-center justify-between">
@@ -479,7 +469,6 @@ export function AddRecipientsContent({
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
-            {/* Add Recipient Button */}
             <div className="flex items-center justify-between pb-2">
               <Label className="text-sm font-semibold text-slate-700">
                 Recipient List
@@ -562,7 +551,6 @@ export function AddRecipientsContent({
               </div>
             </div>
 
-            {/* Recipients List */}
             <div className="space-y-3">
               {recipients.map((recipient, index) => {
                 const hasNameError = validationErrors[`name-${index}`]
@@ -573,13 +561,11 @@ export function AddRecipientsContent({
                     key={recipient.id}
                     className="group relative rounded-xl border-2 border-slate-200 bg-white p-5 transition-all hover:border-indigo-300 hover:shadow-md"
                   >
-                    {/* Order Badge */}
                     <div className="absolute -top-3 -left-3 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-lg">
                       {index + 1}
                     </div>
 
                     <div className="flex items-start gap-4">
-                      {/* Reorder Controls */}
                       <div className="flex flex-col gap-1 pt-2">
                         <Button
                           variant="ghost"
@@ -601,9 +587,7 @@ export function AddRecipientsContent({
                         </Button>
                       </div>
 
-                      {/* Recipient Details */}
                       <div className="flex-1 space-y-4">
-                        {/* Name and Role Row */}
                         <div className="flex items-start gap-3">
                           <div className="flex-1 space-y-1.5">
                             <Label className="text-xs font-medium text-slate-600">
@@ -667,7 +651,6 @@ export function AddRecipientsContent({
                           </div>
                         </div>
 
-                        {/* Email and Phone Row */}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
                             <Label className="text-xs font-medium text-slate-600">
@@ -721,7 +704,6 @@ export function AddRecipientsContent({
                           </div>
                         </div>
 
-                        {/* Role Badge */}
                         <div className="flex items-center gap-2 pt-1">
                           <Badge
                             variant="secondary"
@@ -756,7 +738,6 @@ export function AddRecipientsContent({
                         </div>
                       </div>
 
-                      {/* Delete Button */}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -786,7 +767,6 @@ export function AddRecipientsContent({
           </CardContent>
         </Card>
 
-        {/* Summary Card */}
         <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-50 to-purple-50">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">

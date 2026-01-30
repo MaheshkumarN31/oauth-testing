@@ -24,12 +24,12 @@ function CallbackPage() {
   })
 
   useEffect(() => {
-    if (data?.accessToken) {
-      console.log('✅ Token saved:', data.accessToken)
+    if (data?.access_token) {
+      console.log('✅ Token saved:', data.access_token)
       setTimeout(() => {
         navigate({
           to: '/dashboard',
-          search: { user_id: data?.user?._id || '' },
+          search: { user_id: data.user?._id || '' },
           replace: true,
         })
       }, 1000)

@@ -75,7 +75,7 @@ function SidebarLogo({
       className={cn(
         'flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0',
         isCollapsed &&
-        'cursor-pointer hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2 hover:ring-offset-sidebar transition-all',
+          'cursor-pointer hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2 hover:ring-offset-sidebar transition-all',
       )}
     >
       <Building2 className="h-4 w-4 text-white" />

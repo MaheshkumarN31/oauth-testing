@@ -15,13 +15,6 @@ interface RecipientEditorProps {
   recipients: Array<Recipient>
   onUpdate: (recipients: Array<Recipient>) => void
 }
-export interface Recipient {
-  id: string
-  name: string
-  role: RecipientRole
-  email?: string
-  phone?: string
-}
 
 export function RecipientEditor({
   recipients,
