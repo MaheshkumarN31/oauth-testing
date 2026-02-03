@@ -3,14 +3,9 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   AlertCircle,
   ArrowLeft,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   FileText,
   FolderOpen,
   Loader2,
-  Mail,
-  Phone,
   Plus,
   Save,
   Sparkles,
@@ -36,13 +31,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 
 interface AddRecipientsContentProps {
@@ -58,14 +46,6 @@ interface ContactType {
   type?: string
   [key: string]: any
 }
-
-const ROLE_OPTIONS = [
-  { value: 'sender', label: 'Sender', icon: '📤' },
-  { value: 'signer', label: 'Signer', icon: '✍️' },
-  { value: 'viewer', label: 'Viewer', icon: '👁️' },
-  { value: 'approver', label: 'Approver', icon: '✅' },
-  { value: 'cc', label: 'CC', icon: '📧' },
-] as const
 
 export function AddRecipientsContent({
   selectedWorkspace,
@@ -221,6 +201,7 @@ export function AddRecipientsContent({
         const contactType = contactTypes.find(
           (ct) => ct.name.toLowerCase() === recipient.role.toLowerCase(),
         )
+        console.log(contactType)
 
         return {
           company_name: '',
@@ -278,17 +259,6 @@ export function AddRecipientsContent({
     toast.success(`Added ${contactType.name}`)
   }
 
-  const addRecipient = () => {
-    const newRecipient: Recipient = {
-      id: Date.now().toString(),
-      name: `Recipient ${recipients.length + 1}`,
-      role: 'signer',
-      email: '',
-      phone: '',
-    }
-    setRecipients([...recipients, newRecipient])
-  }
-
   const removeRecipient = (id: string) => {
     if (recipients.length > 1) {
       setRecipients(recipients.filter((r) => r.id !== id))
@@ -318,25 +288,6 @@ export function AddRecipientsContent({
         return newErrors
       })
     }
-  }
-
-  const moveRecipient = (index: number, direction: 'up' | 'down') => {
-    const newRecipients = [...recipients]
-    const targetIndex = direction === 'up' ? index - 1 : index + 1
-
-    if (targetIndex >= 0 && targetIndex < recipients.length) {
-      const temp = newRecipients[index]
-      newRecipients[index] = newRecipients[targetIndex]
-      newRecipients[targetIndex] = temp
-      setRecipients(newRecipients)
-    }
-  }
-
-  const getFileNamesFromPaths = () => {
-    return docPaths.map((path: string) => {
-      const parts = path.split('/')
-      return parts[parts.length - 1]
-    })
   }
 
   return (
@@ -509,7 +460,6 @@ export function AddRecipientsContent({
             <div className="space-y-3">
               {recipients.map((recipient, index) => {
                 const hasNameError = validationErrors[`name-${index}`]
-                const hasEmailError = validationErrors[`email-${index}`]
 
                 return (
                   <div

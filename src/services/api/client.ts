@@ -1,33 +1,20 @@
-// ========================================
-// Base API Client with Authentication
-// ========================================
 
 const BASE_URL = import.meta.env.VITE_PUBLIC_URL
 
-/**
- * Get access token from localStorage
- */
 export function getAccessToken(): string | null {
   return localStorage.getItem('access_token')
 }
 
-/**
- * Set access token in localStorage
- */
+
 export function setAccessToken(token: string): void {
   localStorage.setItem('access_token', token)
 }
 
-/**
- * Remove access token from localStorage
- */
 export function removeAccessToken(): void {
   localStorage.removeItem('access_token')
 }
 
-/**
- * Get default headers with authorization
- */
+
 function getAuthHeaders(): HeadersInit {
   const token = getAccessToken()
   return {
@@ -36,9 +23,6 @@ function getAuthHeaders(): HeadersInit {
   }
 }
 
-/**
- * API Error class for consistent error handling
- */
 export class ApiError extends Error {
   status: number
 
@@ -49,9 +33,7 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * GET request with authentication
- */
+
 export async function apiGet<T>(endpoint: string): Promise<T> {
   const token = getAccessToken()
   if (!token) throw new ApiError('No access token found', 401)
@@ -71,9 +53,7 @@ export async function apiGet<T>(endpoint: string): Promise<T> {
   return response.json()
 }
 
-/**
- * POST request with authentication
- */
+
 export async function apiPost<T>(
   endpoint: string,
   body: unknown,
@@ -108,9 +88,7 @@ export async function apiPost<T>(
   return response.json()
 }
 
-/**
- * POST request without authentication (for OAuth)
- */
+
 export async function apiPostPublic<T>(
   endpoint: string,
   body: URLSearchParams | string,
@@ -127,9 +105,7 @@ export async function apiPostPublic<T>(
   return response.json()
 }
 
-/**
- * Upload file to presigned URL (S3)
- */
+
 export async function uploadToPresignedUrl(
   presignedUrl: string,
   file: File,
