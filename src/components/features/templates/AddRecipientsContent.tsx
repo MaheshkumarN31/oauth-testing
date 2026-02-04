@@ -112,9 +112,6 @@ export function AddRecipientsContent({
     }) => updateTemplateAPI({ templateId, payload }),
     onSuccess: () => {
       toast.success('Template saved successfully! 🎉')
-      setTimeout(() => {
-        window.location.href = `/templates?user_id=${userId}`
-      }, 1000)
     },
     onError: (error: any) => {
       toast.error(error?.data?.message || 'Failed to save template')
