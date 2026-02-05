@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthCheckRouteImport } from './routes/auth-check'
 import { Route as IndexRouteImport } from './routes/index'
@@ -32,6 +33,11 @@ const SigninRoute = SigninRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactsRoute = ContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CallbackRoute = CallbackRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth-check': typeof AuthCheckRoute
   '/callback': typeof CallbackRoute
+  '/contacts': typeof ContactsRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth-check': typeof AuthCheckRoute
   '/callback': typeof CallbackRoute
+  '/contacts': typeof ContactsRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth-check': typeof AuthCheckRoute
   '/callback': typeof CallbackRoute
+  '/contacts': typeof ContactsRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth-check'
     | '/callback'
+    | '/contacts'
     | '/dashboard'
     | '/signin'
     | '/templates'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth-check'
     | '/callback'
+    | '/contacts'
     | '/dashboard'
     | '/signin'
     | '/templates'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth-check'
     | '/callback'
+    | '/contacts'
     | '/dashboard'
     | '/signin'
     | '/templates'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthCheckRoute: typeof AuthCheckRoute
   CallbackRoute: typeof CallbackRoute
+  ContactsRoute: typeof ContactsRoute
   DashboardRoute: typeof DashboardRoute
   SigninRoute: typeof SigninRoute
   TemplatesRoute: typeof TemplatesRoute
@@ -169,6 +182,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contacts': {
+      id: '/contacts'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof ContactsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/callback': {
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthCheckRoute: AuthCheckRoute,
   CallbackRoute: CallbackRoute,
+  ContactsRoute: ContactsRoute,
   DashboardRoute: DashboardRoute,
   SigninRoute: SigninRoute,
   TemplatesRoute: TemplatesRoute,
