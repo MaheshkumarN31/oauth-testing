@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import {
   AlertCircle,
   ArrowLeft,
@@ -14,11 +14,12 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Recipient, RecipientRole, Workspace } from '@/types'
+import type { ContactType } from '@/services/api/contact-types'
 import {
   createTemplateAPI,
-  getContactTypesAPI,
   updateTemplateAPI,
 } from '@/services/api'
+import { useContactTypes } from '@/hooks/queries/useContactTypes'
 import { PageHeader } from '@/components/common'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -47,15 +48,7 @@ const getUserFromLocalStorage = () => {
   }
 }
 
-interface ContactType {
-  _id: string
-  name: string
-  company_id: string
-  role?: string
-  color?: string
-  type?: string
-  [key: string]: any
-}
+
 
 // Color palette for recipients when contact types don't have colors
 const RECIPIENT_COLORS = [
@@ -99,23 +92,7 @@ export function AddRecipientsContent({
     Record<string, string>
   >({})
 
-  const { data: contactTypesData, isLoading: isLoadingContactTypes } = useQuery(
-    {
-      queryKey: ['contactTypes', companyId],
-      queryFn: () => getContactTypesAPI({ company_id: companyId }),
-      enabled: !!companyId,
-    },
-  )
-
-  const contactTypes: Array<ContactType> = Array.isArray(
-    contactTypesData?.data?.data,
-  )
-    ? contactTypesData.data.data
-    : Array.isArray(contactTypesData?.data)
-      ? contactTypesData.data
-      : Array.isArray(contactTypesData)
-        ? contactTypesData
-        : []
+  const { data: contactTypes = [], isLoading: isLoadingContactTypes } = useContactTypes(companyId)
 
   console.log(contactTypes, 'types')
 

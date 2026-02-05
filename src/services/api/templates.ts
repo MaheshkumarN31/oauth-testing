@@ -293,77 +293,7 @@ export const duplicateTemplateAPI = async ({
   }
 };
 
-/**
- * Get contact types
- */
-export const getContactTypesAPI = async (queryParams: {
-  company_id: string;
-}): Promise<any> => {
-  try {
-    const response = await $fetch.get("/api/contact-types/v2", queryParams);
-    return response;
-  } catch (err) {
-    throw err;
-  }
-};
 
-/**
- * Create contact type
- */
-export const createContactTypeAPI = async (payload: {
-  name: string;
-  company_id: string;
-  [key: string]: any;
-}): Promise<any> => {
-  try {
-    const response = await $fetch.post("/api/contact-types/v2", payload);
-    return response;
-  } catch (err) {
-    throw err;
-  }
-};
-
-/**
- * Update contact type
- */
-export const updateContactTypeAPI = async ({
-  contactTypeId,
-  payload,
-}: {
-  contactTypeId: string;
-  payload: { name?: string; company_id: string;[key: string]: any };
-}): Promise<any> => {
-  try {
-    const response = await $fetch.put(
-      `/api/contact-types/v2/${contactTypeId}`,
-      payload
-    );
-    return response;
-  } catch (err) {
-    throw err;
-  }
-};
-
-/**
- * Delete contact type
- */
-export const deleteContactTypeAPI = async ({
-  contactTypeId,
-  payload,
-}: {
-  contactTypeId: string;
-  payload?: { company_id: string };
-}): Promise<any> => {
-  try {
-    const response = await $fetch.delete(
-      `/api/contact-types/v2/${contactTypeId}`,
-      payload
-    );
-    return response;
-  } catch (err) {
-    throw err;
-  }
-};
 export const updateTemplateAPI = async ({
   templateId,
   payload,

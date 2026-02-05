@@ -15,7 +15,8 @@ export * from './workspaces'
 export * from './documents'
 
 // Template APIs
-export * from './templates'
+export * from "./templates";
+export * from "./auth";
+export * from "./contact-types";
 
-// Contact APIs
 export * from './contacts'

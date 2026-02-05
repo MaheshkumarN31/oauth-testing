@@ -8,6 +8,7 @@ import {
   LogOut,
   Plus,
   Settings,
+  Tag,
   Users,
 } from 'lucide-react'
 import { Link, useLocation } from '@tanstack/react-router'
@@ -201,6 +202,12 @@ export function AppSidebar({
       icon: Users,
       href: `/contacts?user_id=${userId}`,
       path: '/contacts',
+    },
+    {
+      title: 'Contact Types',
+      icon: Tag,
+      href: `/contact-types?user_id=${userId}`,
+      path: '/contact-types',
     },
     {
       title: 'Analytics',
