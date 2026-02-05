@@ -37,6 +37,16 @@ interface AddRecipientsContentProps {
   selectedWorkspace: Workspace | null
 }
 
+// Helper function to get logged-in user details from localStorage
+const getUserFromLocalStorage = () => {
+  try {
+    const userStr = localStorage.getItem('user')
+    return userStr ? JSON.parse(userStr) : null
+  } catch {
+    return null
+  }
+}
+
 interface ContactType {
   _id: string
   name: string
@@ -46,6 +56,19 @@ interface ContactType {
   type?: string
   [key: string]: any
 }
+
+// Color palette for recipients when contact types don't have colors
+const RECIPIENT_COLORS = [
+  '#006c00', // Green
+  '#0066cc', // Blue
+  '#ff6600', // Orange
+  '#9933cc', // Purple
+  '#cc0000', // Red
+  '#00cccc', // Cyan
+  '#ff9900', // Amber
+  '#0099ff', // Sky Blue
+  '#cc6699', // Rose
+]
 
 export function AddRecipientsContent({
   selectedWorkspace,
@@ -58,13 +81,16 @@ export function AddRecipientsContent({
   const companyId = selectedWorkspace?._id || ''
   const [editableTemplateName, setEditableTemplateName] =
     useState(templateNameParam)
+
+  // Get logged-in user data and initialize sender with it
+  const user = getUserFromLocalStorage()
   const [recipients, setRecipients] = useState<Array<Recipient>>([
     {
       id: '1',
-      name: 'Sender',
+      name: user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Sender' : 'Sender',
       role: 'sender',
-      email: '',
-      phone: '',
+      email: user?.email || '',
+      phone: user?.phone || '',
     },
   ])
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
@@ -85,15 +111,29 @@ export function AddRecipientsContent({
     contactTypesData?.data?.data,
   )
     ? contactTypesData.data.data
-    : Array.isArray(contactTypesData)
-      ? contactTypesData
-      : []
+    : Array.isArray(contactTypesData?.data)
+      ? contactTypesData.data
+      : Array.isArray(contactTypesData)
+        ? contactTypesData
+        : []
 
   console.log(contactTypes, 'types')
 
   const createTemplateMutation = useMutation({
     mutationFn: createTemplateAPI,
     onSuccess: (response: any) => {
+      console.log('DEBUG: Create template response:', response)
+
+      // Store redirect URL for later use after document users update
+      const redirectUrl = response?.data?.data?.redirect_url || response?.data?.redirect_url || response?.redirect_url
+      console.log('DEBUG: Extracted redirect URL:', redirectUrl)
+
+      if (redirectUrl) {
+        sessionStorage.setItem('template_redirect_url', redirectUrl)
+        console.log('DEBUG: Stored redirect URL in sessionStorage')
+      } else {
+        console.warn('DEBUG: No redirect URL found in response')
+      }
       return response.data._id
     },
     onError: (error: any) => {
@@ -112,6 +152,33 @@ export function AddRecipientsContent({
     }) => updateTemplateAPI({ templateId, payload }),
     onSuccess: () => {
       toast.success('Template saved successfully! 🎉')
+
+      // Get redirect URL from sessionStorage and open in new tab
+      const redirectUrl = sessionStorage.getItem('template_redirect_url')
+      console.log('DEBUG: Retrieved redirect URL from sessionStorage:', redirectUrl)
+
+      if (redirectUrl) {
+        // Get access token from localStorage
+        const accessToken = localStorage.getItem('access_token')
+        console.log('DEBUG: Access token from localStorage:', accessToken)
+
+        // Replace the token parameter in the URL with the access token from localStorage
+        let finalUrl = redirectUrl
+        if (accessToken) {
+          // Parse the URL to replace the token parameter
+          const url = new URL(redirectUrl)
+          url.searchParams.set('token', accessToken)
+          finalUrl = url.toString()
+          console.log('DEBUG: Final URL with replaced token:', finalUrl)
+        }
+
+        console.log('DEBUG: Opening redirect URL in new tab:', finalUrl)
+        window.open(finalUrl, '_blank')
+        sessionStorage.removeItem('template_redirect_url')
+        console.log('DEBUG: Redirect URL opened and removed from sessionStorage')
+      } else {
+        console.warn('DEBUG: No redirect URL found in sessionStorage')
+      }
     },
     onError: (error: any) => {
       toast.error(error?.data?.message || 'Failed to save template')
@@ -183,7 +250,7 @@ export function AddRecipientsContent({
 
       console.log('DEBUG: createResponse', createResponse)
 
-      // Handle nested data response structure safety
+      // Handle nested data response structure safely
       const templateId =
         createResponse?.data?._id ||
         createResponse?.data?.data?._id ||
@@ -194,43 +261,109 @@ export function AddRecipientsContent({
         throw new Error('Failed to get valid template ID from server')
       }
 
-      const documentUsers = recipients.map((recipient, index) => {
-        const contactType = contactTypes.find(
-          (ct) => ct.name.toLowerCase() === recipient.role.toLowerCase(),
-        )
-        console.log(contactType)
+      // Track contact type counts for auto-numbering roles
+      const contactTypeCounts: Record<string, number> = {}
 
-        return {
-          company_name: '',
-          address: '',
-          title: '',
-          email: recipient.email || '',
-          first_name: recipient.name.split(' ')[0] || '',
-          last_name: recipient.name.split(' ').slice(1).join(' ') || '',
-          phone: recipient.phone || '',
-          name: recipient.name,
-          contact_type_name: contactType?.name || recipient.role,
-          role: recipient.role,
-          // _id removed to let backend generate it
-          default: index === 0,
-          e_signature_required: recipient.role === 'signer',
-          value: recipient.role.toUpperCase(),
-          type: recipient.role.toUpperCase(),
-          e_signature_order: index,
-          has_approval_access: false,
-          is_cc: recipient.role === 'cc',
-          user_type: recipient.role === 'signer' ? 'SIGNER' : 'VIEWER',
-          color: contactType?.color || '#e60076',
-          entity_data_id: null,
-          fields_required: false,
-          user_id: '',
+      // Track total receiver count for RECEIVER_N numbering
+      let receiverCount = 0
+
+      const documentUsers = recipients.map((recipient, index) => {
+        // For sender (first recipient)
+        const isSender = index === 0 && recipient.role === 'sender'
+
+        if (isSender) {
+          // SENDER payload structure - matches API reference exactly
+          return {
+            company_name: user?.company_name || '',
+            address: user?.address || '',
+            full_name: user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : '',
+            title: user?.title || '',
+            email: user?.email || recipient.email || '',
+            first_name: user?.first_name || '',
+            last_name: user?.last_name || '',
+            phone: user?.phone || recipient.phone || '',
+            name: user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : recipient.name,
+            role: 'sender',
+            default: true,
+            e_signature_required: true,
+            value: 'SENDER',
+            type: 'SENDER',
+            e_signature_order: 0,
+            has_approval_access: false,
+            is_cc: false,
+            user_type: 'SIGNER',
+            color: '#e60076',
+            entity_data_id: null,
+            fields_required: false,
+            user_id: userId || '',
+          }
+        } else {
+          // NON-SENDER (RECEIVER) payload structure - matches API reference exactly
+          // Find contact type by matching the recipient's name
+          const contactType = contactTypes.find(
+            (ct) => ct.name.toLowerCase() === recipient.name.toLowerCase(),
+          )
+
+          const contactTypeName = contactType?.name || recipient.name
+
+          // Increment count for this contact type
+          contactTypeCounts[contactTypeName] = (contactTypeCounts[contactTypeName] || 0) + 1
+
+          // Increment overall receiver count
+          receiverCount++
+
+          // Auto-number role: "ContactType-1", "ContactType-2"
+          const role = `${contactTypeName}-${contactTypeCounts[contactTypeName]}`
+
+          // Auto-number value: "RECEIVER_1", "RECEIVER_2"
+          const value = `RECEIVER_${receiverCount}`
+
+          // Get the actual type from contact type (RECEIVER, CC, etc.)
+          const contactTypeType = contactType?.type?.toUpperCase() || 'RECEIVER'
+
+          // Assign color from palette (cycling through colors for each recipient)
+          // Skip index 0 (sender), so subtract 1 for recipient color index
+          const colorIndex = (index - 1) % RECIPIENT_COLORS.length
+          const recipientColor = contactType?.color || RECIPIENT_COLORS[colorIndex]
+
+          return {
+            company_name: '',
+            address: '',
+            full_name: '',
+            title: '',
+            email: '',
+            first_name: '',
+            last_name: '',
+            phone: '',
+            name: '',
+            contact_type_name: contactTypeName,
+            role: role,
+            default: false,
+            value: value,
+            type: contactTypeType,
+            e_signature_order: index,
+            is_cc: contactTypeType === 'CC',
+            user_type: contactTypeType === 'SIGNER' ? 'SIGNER' : 'VIEWER',
+            color: recipientColor,
+            entity_data_id: null,
+            fields_required: false,
+            user_id: '',
+            contact_type: contactType?._id || '',
+          }
         }
       })
 
+      // Construct update payload matching API reference structure
       const updatePayload = {
         title: editableTemplateName,
         document_users: documentUsers,
+        enforce_signature_order: true,
+        fields: [],
+        company_id: companyId,
+        is_anyone_can_approve: false,
       }
+
+      console.log('DEBUG: Update payload:', JSON.stringify(updatePayload, null, 2))
 
       await updateTemplateMutation.mutateAsync({
         templateId,
@@ -490,6 +623,7 @@ export function AddRecipientsContent({
                                     ? 'border-red-300 focus:border-red-500'
                                     : 'border-slate-200 focus:border-indigo-500',
                                 )}
+                                disabled={index === 0} // Disable editing sender name
                               />
                               {hasNameError && (
                                 <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
@@ -499,37 +633,6 @@ export function AddRecipientsContent({
                               )}
                             </div>
                           </div>
-
-                          {/* <div className="w-44 space-y-1.5">
-                            <Label className="text-xs font-medium text-slate-600">
-                              Role *
-                            </Label>
-                            <Select
-                              value={recipient.role}
-                              onValueChange={(value) =>
-                                updateRecipient(recipient.id, {
-                                  role: value as RecipientRole,
-                                })
-                              }
-                            >
-                              <SelectTrigger className="h-11 border-slate-200 focus:border-indigo-500">
-                                <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {ROLE_OPTIONS.map((option) => (
-                                  <SelectItem
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    <span className="flex items-center gap-2">
-                                      <span>{option.icon}</span>
-                                      <span>{option.label}</span>
-                                    </span>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div> */}
                         </div>
                       </div>
 
@@ -538,7 +641,7 @@ export function AddRecipientsContent({
                         size="icon"
                         className="h-9 w-9 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all shrink-0 opacity-0 group-hover:opacity-100 mt-5"
                         onClick={() => removeRecipient(recipient.id)}
-                        disabled={recipients.length <= 1}
+                        disabled={recipients.length <= 1 || index === 0}
                       >
                         <Trash2 className="h-10 w-10 text-red-500" />
                       </Button>
