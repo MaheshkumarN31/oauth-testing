@@ -67,6 +67,7 @@ export function CreateDocumentFromTemplate({ selectedWorkspace }: CreateDocument
     const [selectedContacts, setSelectedContacts] = useState<Record<string, string>>({})
     const [contactsCache, setContactsCache] = useState<Record<string, any>>({})
     const [isCreating, setIsCreating] = useState(false)
+    const [updatedDocumentUsers, setUpdatedDocumentUsers] = useState<any[]>([])
 
     // Debug logging on mount and when dependencies change
     useEffect(() => {
@@ -130,8 +131,9 @@ export function CreateDocumentFromTemplate({ selectedWorkspace }: CreateDocument
 
             toast.success('Document created successfully! 🎉')
 
-            // Navigate to send document screen
-            const recipients = template?.document_users || []
+            // Navigate to send document screen with updated document users (includes contact emails)
+            const recipients = updatedDocumentUsers.length > 0 ? updatedDocumentUsers : template?.document_users || []
+            console.log('📧 Recipients for send screen:', recipients)
             const recipientsParam = encodeURIComponent(JSON.stringify(recipients))
 
             setTimeout(() => {
@@ -223,6 +225,10 @@ export function CreateDocumentFromTemplate({ selectedWorkspace }: CreateDocument
             }
 
             console.log('📤 Create Document Payload:', payload)
+            console.log('📧 Updated Document Users:', documentUsers)
+
+            // Store updated document users for navigation
+            setUpdatedDocumentUsers(documentUsers)
 
             await createDocumentMutation.mutateAsync({ templateId, payload })
         } catch (error) {

@@ -35,6 +35,12 @@ export function SendDocumentScreen({ selectedWorkspace }: SendDocumentScreenProp
     const user = getUserFromLocalStorage()
     const recipients = JSON.parse(decodeURIComponent(recipientsParam))
 
+    console.log('🔍 Send Document Debug:')
+    console.log('Recipients Param:', recipientsParam)
+    console.log('Parsed Recipients:', recipients)
+    console.log('Template ID:', templateId)
+    console.log('Response ID:', responseId)
+
     const [emailSubject, setEmailSubject] = useState(`Please review and sign - ${documentTitle}`)
     const [emailNotes, setEmailNotes] = useState('')
     const [emailCC, setEmailCC] = useState('')
@@ -100,6 +106,9 @@ export function SendDocumentScreen({ selectedWorkspace }: SendDocumentScreenProp
         .filter((r: any) => r.role !== 'sender')
         .map((r: any) => r.email)
         .filter(Boolean)
+
+    console.log('📋 Recipient Emails for Display:', recipientEmails)
+    console.log('📋 All Recipients:', recipients)
 
     return (
         <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-slate-100/50">
