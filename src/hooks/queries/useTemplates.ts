@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query'
-import { fetchTemplatesAPI } from '@/services/api'
+import { getAllTemplatesAPI } from '@/services/api'
 
 export const TEMPLATES_QUERY_KEY = 'templates'
 
@@ -21,8 +21,18 @@ export function useTemplates({
     queryKey: [TEMPLATES_QUERY_KEY, companyId, page, pageSize],
     queryFn: async () => {
       if (!companyId) throw new Error('No company ID provided')
-      const response = await fetchTemplatesAPI({ company_id: companyId, page: page + 1, limit: pageSize })
-      return response.data
+      const response = await getAllTemplatesAPI({
+        company_id: companyId,
+        status: 'ACTIVE',
+        order_by: 'created_at',
+        order_type: 'desc',
+      })
+      // Return the data array from response
+      // API returns: { success: true, message: "...", data: [...] }
+      return {
+        data: response.data?.data || [],
+        total: response.data?.data?.length || 0,
+      }
     },
     enabled: enabled && !!companyId,
   })

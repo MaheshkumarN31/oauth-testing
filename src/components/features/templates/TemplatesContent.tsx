@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { FolderOpen } from 'lucide-react'
 import { PageHeader } from '@/components/common'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DocsColumns } from '@/components/core/DocsColumns'
+import { TemplateColumns } from '@/components/core/TemplateColumns'
 import TanStackTable from '@/components/core/TanstackTable'
 import { CreateTemplateDialog } from './CreateTemplateDialog'
 import { useTemplates } from '@/hooks/queries'
@@ -65,7 +65,7 @@ export function TemplatesContent({ selectedWorkspace }: TemplatesContentProps) {
           <CardContent className="p-0">
             <TanStackTable
               data={templatesData?.data || []}
-              columns={DocsColumns}
+              columns={TemplateColumns}
               pageIndex={pageIndex}
               pageSize={pageSize}
               pageCount={pageCount}

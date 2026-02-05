@@ -52,6 +52,34 @@ export const fetchTemplatesAPI = async (
 };
 
 /**
+ * Get all templates for a company
+ * Endpoint: GET /api/templates-v2
+ */
+export const getAllTemplatesAPI = async ({
+  company_id,
+  status = 'ACTIVE',
+  order_by = 'created_at',
+  order_type = 'desc',
+}: {
+  company_id: string;
+  status?: string;
+  order_by?: string;
+  order_type?: 'asc' | 'desc';
+}): Promise<any> => {
+  try {
+    const response = await $fetch.get("/api/templates-v2", {
+      company_id,
+      status,
+      order_by,
+      order_type,
+    });
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
  * Get template by ID
  */
 export const getTemplateByIdAPI = async ({
@@ -94,8 +122,8 @@ export const deleteTemplateAPI = async ({
  * Get presigned URLs for file uploads
  */
 export const getPresignedUrlsAPI = async (payload: {
-    filenames: Array<string>;
-    company_id: string;
+  filenames: Array<string>;
+  company_id: string;
 }): Promise<any> => {
   try {
     const response = await $fetch.post(
@@ -126,13 +154,13 @@ export const uploadFileToS3API = async (
  * Upload multiple files and return results
  */
 export const uploadMultipleFilesAPI = async ({
-    files,
-    uploadUrls,
-    onProgress,
+  files,
+  uploadUrls,
+  onProgress,
 }: {
-    files: Array<File>;
-    uploadUrls: Array<string>;
-    onProgress?: (progress: UploadProgress) => void;
+  files: Array<File>;
+  uploadUrls: Array<string>;
+  onProgress?: (progress: UploadProgress) => void;
 }): Promise<Array<{ success: boolean; error?: string }>> => {
   try {
     const results = await Promise.all(
@@ -251,7 +279,7 @@ export const updateContactTypeAPI = async ({
   payload,
 }: {
   contactTypeId: string;
-  payload: { name?: string; company_id: string; [key: string]: any };
+  payload: { name?: string; company_id: string;[key: string]: any };
 }): Promise<any> => {
   try {
     const response = await $fetch.put(
