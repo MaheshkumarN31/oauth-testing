@@ -116,11 +116,27 @@ export function CreateDocumentFromTemplate({ selectedWorkspace }: CreateDocument
     // Create document mutation
     const createDocumentMutation = useMutation({
         mutationFn: createDocumentFromTemplateAPI,
-        onSuccess: () => {
+        onSuccess: (response) => {
+            console.log('✅ Document Created Response:', response)
+
+            // Extract response_id from API response
+            const responseId = response?.data?.data?._id || response?.data?._id || response?._id
+
+            if (!responseId) {
+                console.error('❌ No response_id found in response:', response)
+                toast.error('Document created but missing response ID')
+                return
+            }
+
             toast.success('Document created successfully! 🎉')
-            // Reset selected contacts to allow creating another document
-            setSelectedContacts({})
-            setContactsCache({})
+
+            // Navigate to send document screen
+            const recipients = template?.document_users || []
+            const recipientsParam = encodeURIComponent(JSON.stringify(recipients))
+
+            setTimeout(() => {
+                window.location.href = `/documents/send?template_id=${templateId}&response_id=${responseId}&user_id=${userId}&title=${encodeURIComponent(template?.title || 'Document')}&recipients=${recipientsParam}`
+            }, 500)
         },
         onError: (error: any) => {
             console.error('❌ Create Document Error:', error)

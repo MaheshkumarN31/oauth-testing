@@ -16,6 +16,7 @@ import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthCheckRouteImport } from './routes/auth-check'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TemplatesAddRecipientsRouteImport } from './routes/templates_.add-recipients'
+import { Route as DocumentsSendRouteImport } from './routes/documents_.send'
 import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/documents_.create-from-template'
 
 const TemplatesRoute = TemplatesRouteImport.update({
@@ -53,6 +54,11 @@ const TemplatesAddRecipientsRoute = TemplatesAddRecipientsRouteImport.update({
   path: '/templates/add-recipients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentsSendRoute = DocumentsSendRouteImport.update({
+  id: '/documents_/send',
+  path: '/documents/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocumentsCreateFromTemplateRoute =
   DocumentsCreateFromTemplateRouteImport.update({
     id: '/documents_/create-from-template',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
   '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
+  '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
 }
 export interface FileRoutesByTo {
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
   '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
+  '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
 }
 export interface FileRoutesById {
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
   '/documents_/create-from-template': typeof DocumentsCreateFromTemplateRoute
+  '/documents_/send': typeof DocumentsSendRoute
   '/templates_/add-recipients': typeof TemplatesAddRecipientsRoute
 }
 export interface FileRouteTypes {
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/templates'
     | '/documents/create-from-template'
+    | '/documents/send'
     | '/templates/add-recipients'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/templates'
     | '/documents/create-from-template'
+    | '/documents/send'
     | '/templates/add-recipients'
   id:
     | '__root__'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/templates'
     | '/documents_/create-from-template'
+    | '/documents_/send'
     | '/templates_/add-recipients'
   fileRoutesById: FileRoutesById
 }
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   TemplatesRoute: typeof TemplatesRoute
   DocumentsCreateFromTemplateRoute: typeof DocumentsCreateFromTemplateRoute
+  DocumentsSendRoute: typeof DocumentsSendRoute
   TemplatesAddRecipientsRoute: typeof TemplatesAddRecipientsRoute
 }
 
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TemplatesAddRecipientsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documents_/send': {
+      id: '/documents_/send'
+      path: '/documents/send'
+      fullPath: '/documents/send'
+      preLoaderRoute: typeof DocumentsSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/documents_/create-from-template': {
       id: '/documents_/create-from-template'
       path: '/documents/create-from-template'
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   TemplatesRoute: TemplatesRoute,
   DocumentsCreateFromTemplateRoute: DocumentsCreateFromTemplateRoute,
+  DocumentsSendRoute: DocumentsSendRoute,
   TemplatesAddRecipientsRoute: TemplatesAddRecipientsRoute,
 }
 export const routeTree = rootRouteImport

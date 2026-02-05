@@ -122,6 +122,36 @@ export const getTemplateByIdAPI = async ({
   }
 };
 
+/**
+ * Send document to recipients
+ * Endpoint: POST /api/templates-v2/:template_id/responses/:response_id/send
+ */
+export const sendDocumentAPI = async ({
+  templateId,
+  responseId,
+  payload,
+}: {
+  templateId: string;
+  responseId: string;
+  payload: {
+    email_subject: string;
+    email_notes: string;
+    email_to: string[];
+    sender_fill_later: boolean;
+    email_cc: string[];
+  };
+}): Promise<any> => {
+  try {
+    const response = await $fetch.post(
+      `/api/templates-v2/${templateId}/responses/${responseId}/send`,
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
 export const deleteTemplateAPI = async ({
   templateId,
   payload,
