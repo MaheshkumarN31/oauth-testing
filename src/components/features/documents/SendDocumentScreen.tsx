@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { ArrowLeft, Mail, Send, User } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Mail, Send, User } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Workspace } from '@/types'
 import { sendDocumentAPI } from '@/services/api'
@@ -28,7 +28,7 @@ export function SendDocumentScreen({ selectedWorkspace }: SendDocumentScreenProp
     const searchParams = new URLSearchParams(window.location.search)
     const templateId = searchParams.get('template_id') || ''
     const responseId = searchParams.get('response_id') || ''
-    const userId = searchParams.get('user_id') || ''
+    const userId = searchParams.get('user_id') || localStorage.getItem('user_id') || ''
     const documentTitle = searchParams.get('title') || 'Document'
     const recipientsParam = searchParams.get('recipients') || '[]'
 
@@ -40,20 +40,19 @@ export function SendDocumentScreen({ selectedWorkspace }: SendDocumentScreenProp
     console.log('Parsed Recipients:', recipients)
     console.log('Template ID:', templateId)
     console.log('Response ID:', responseId)
+    console.log('User ID:', userId)
 
     const [emailSubject, setEmailSubject] = useState(`Please review and sign - ${documentTitle}`)
     const [emailNotes, setEmailNotes] = useState('')
     const [emailCC, setEmailCC] = useState('')
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false)
 
     // Send document mutation
     const sendMutation = useMutation({
         mutationFn: sendDocumentAPI,
         onSuccess: () => {
             toast.success('Document sent successfully! 🎉')
-            // Redirect to documents page
-            setTimeout(() => {
-                window.location.href = `/documents?user_id=${userId}`
-            }, 1500)
+            setShowSuccessDialog(true)
         },
         onError: (error: any) => {
             console.error('❌ Send Document Error:', error)
@@ -63,6 +62,17 @@ export function SendDocumentScreen({ selectedWorkspace }: SendDocumentScreenProp
 
     const handleBack = () => {
         window.history.back()
+    }
+
+    const handleBackToDocuments = () => {
+        // Get user_id from user object in localStorage
+        const finalUserId = user?._id || userId || localStorage.getItem('user_id') || ''
+        console.log('📍 Navigating to dashboard with userId:', finalUserId)
+        if (!finalUserId) {
+            toast.error('User ID not found')
+            return
+        }
+        window.location.href = `/dashboard?user_id=${finalUserId}`
     }
 
     const handleSend = async () => {
@@ -109,6 +119,72 @@ export function SendDocumentScreen({ selectedWorkspace }: SendDocumentScreenProp
 
     console.log('📋 Recipient Emails for Display:', recipientEmails)
     console.log('📋 All Recipients:', recipients)
+
+    if (showSuccessDialog) {
+        return (
+            <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+                {/* Subtle background pattern */}
+                <div className="absolute inset-0 opacity-40">
+                    <div className="absolute inset-0" style={{
+                        backgroundImage: `radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.15) 1px, transparent 0)`,
+                        backgroundSize: '40px 40px'
+                    }} />
+                </div>
+
+                <div className="relative z-10 max-w-xl w-full px-6 space-y-8">
+                    {/* Success Icon - Clean and minimal */}
+                    <div className="flex justify-center">
+                        <div className="relative h-20 w-20 rounded-full bg-emerald-50 flex items-center justify-center border-4 border-emerald-100">
+                            <CheckCircle2 className="h-12 w-12 text-emerald-600" strokeWidth={2} />
+                        </div>
+                    </div>
+
+                    {/* Success Message - Concise */}
+                    <div className="text-center space-y-2">
+                        <h1 className="text-3xl font-semibold text-slate-900">
+                            Document Sent
+                        </h1>
+                        <p className="text-slate-600">
+                            Recipients will receive signing instructions via email
+                        </p>
+                    </div>
+
+                    {/* Document Info Card - Clean and structured */}
+                    <Card className="border border-slate-200 shadow-sm bg-white">
+                        <CardContent className="p-6 space-y-4">
+                            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                                <span className="text-sm text-slate-500">Document</span>
+                                <span className="font-medium text-slate-900">{documentTitle}</span>
+                            </div>
+                            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                                <span className="text-sm text-slate-500">Recipients</span>
+                                <span className="font-medium text-slate-900">
+                                    {recipientEmails.length} {recipientEmails.length !== 1 ? 'recipients' : 'recipient'}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between pt-2">
+                                <span className="text-sm text-slate-500">Status</span>
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 text-emerald-700 text-sm font-medium">
+                                    <CheckCircle2 className="h-3.5 w-3.5" />
+                                    Sent
+                                </span>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Action Button - Professional */}
+                    <div className="flex justify-center pt-2">
+                        <Button
+                            onClick={handleBackToDocuments}
+                            className="bg-slate-900 text-white hover:bg-slate-800 shadow-sm px-8 py-5 rounded-lg font-medium transition-colors"
+                        >
+                            Return to Dashboard
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-slate-100/50">
