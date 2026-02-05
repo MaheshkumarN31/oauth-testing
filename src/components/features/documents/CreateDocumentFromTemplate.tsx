@@ -362,15 +362,6 @@ export function CreateDocumentFromTemplate({ selectedWorkspace }: CreateDocument
 
             <div className="flex-1 overflow-auto p-6">
                 <div className="max-w-4xl mx-auto space-y-6">
-                    {/* Debug Info Alert (remove in production) */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <Alert>
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription className="text-xs">
-                                <strong>Debug Info:</strong> Template ID: {templateId} | Company ID: {companyId} | Recipients: {recipients.length}
-                            </AlertDescription>
-                        </Alert>
-                    )}
 
                     {/* Sender Card */}
                     <Card className="border-0 shadow-lg overflow-hidden">
@@ -567,7 +558,7 @@ function RecipientContactSelector({
                             Select Contact *
                         </Label>
                         <Select
-                            value={selectedContactId}
+                            value=""
                             onValueChange={(value) => {
                                 const contact = contacts?.find((c: any) => c._id === value)
                                 if (contact) {
@@ -579,7 +570,7 @@ function RecipientContactSelector({
                                 id={`contact-${recipient._id}`}
                                 className="w-full h-11 border-2"
                             >
-                                <SelectValue placeholder="Choose a contact..." />
+                                <SelectValue placeholder={selectedContactId ? "Select another contact..." : "Choose a contact..."} />
                             </SelectTrigger>
                             <SelectContent>
                                 {isLoading ? (
@@ -612,21 +603,21 @@ function RecipientContactSelector({
                     </div>
 
                     {selectedContact && (
-                        <div className="p-4 rounded-lg bg-white border border-emerald-200 shadow-sm">
+                        <div className="p-4 rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-2 border-emerald-300 shadow-sm">
                             <div className="flex items-start gap-3">
-                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-semibold">
+                                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
                                     {selectedContact.first_name?.[0]}{selectedContact.last_name?.[0]}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="font-semibold text-foreground">
+                                    <p className="font-semibold text-foreground text-base">
                                         {selectedContact.full_name || `${selectedContact.first_name} ${selectedContact.last_name}`}
                                     </p>
-                                    <p className="text-sm text-muted-foreground mt-0.5">{selectedContact.email}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">{selectedContact.email}</p>
                                     {selectedContact.phone && (
-                                        <p className="text-sm text-muted-foreground">{selectedContact.phone}</p>
+                                        <p className="text-sm text-muted-foreground mt-0.5">{selectedContact.phone}</p>
                                     )}
                                     {selectedContact.company_name && (
-                                        <p className="text-xs text-muted-foreground mt-1">
+                                        <p className="text-xs text-muted-foreground mt-2 bg-white/50 px-2 py-1 rounded inline-block">
                                             {selectedContact.company_name}
                                         </p>
                                     )}
