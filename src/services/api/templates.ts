@@ -80,6 +80,28 @@ export const getAllTemplatesAPI = async ({
 };
 
 /**
+ * Create document from template
+ * Endpoint: POST /api/templates-v2/:template_id/responses
+ */
+export const createDocumentFromTemplateAPI = async ({
+  templateId,
+  payload,
+}: {
+  templateId: string;
+  payload: any;
+}): Promise<any> => {
+  try {
+    const response = await $fetch.post(
+      `/api/templates-v2/${templateId}/responses`,
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
  * Get template by ID
  */
 export const getTemplateByIdAPI = async ({
@@ -91,7 +113,7 @@ export const getTemplateByIdAPI = async ({
 }): Promise<any> => {
   try {
     const response = await $fetch.get(
-      `/api/documents-templates/${templateId}`,
+      `/api/templates-v2/${templateId}`,
       queryParams || {}
     );
     return response;

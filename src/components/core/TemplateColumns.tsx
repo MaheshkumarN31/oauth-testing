@@ -1,6 +1,5 @@
-import { FileText, Users } from 'lucide-react'
+import { FileText, Users, Send } from 'lucide-react'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Badge } from '@/components/ui/badge'
 
 export const TemplateColumns: Array<ColumnDef<any>> = [
     {
@@ -63,21 +62,26 @@ export const TemplateColumns: Array<ColumnDef<any>> = [
         },
     },
     {
-        accessorKey: 'is_published',
-        header: 'Status',
-        cell: ({ getValue }) => {
-            const isPublished = getValue() as boolean
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+            const template = row.original
+
+            const handleSend = () => {
+                const userId = localStorage.getItem('user_id') || ''
+                const companyId = template.company_id || localStorage.getItem('company_id') || ''
+                // Navigate to contact selection screen
+                window.location.href = `/documents/create-from-template?template_id=${template._id}&user_id=${userId}&company_id=${companyId}`
+            }
 
             return (
-                <Badge
-                    variant={isPublished ? 'default' : 'outline'}
-                    className={isPublished
-                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20'
-                        : 'bg-slate-500/10 text-slate-600 border-slate-500/20 hover:bg-slate-500/20'
-                    }
+                <button
+                    onClick={handleSend}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium text-sm hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 shadow-sm hover:shadow-md"
                 >
-                    {isPublished ? 'Published' : 'Draft'}
-                </Badge>
+                    <Send className="h-4 w-4" />
+                    Send
+                </button>
             )
         },
     },

@@ -16,6 +16,7 @@ import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthCheckRouteImport } from './routes/auth-check'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TemplatesAddRecipientsRouteImport } from './routes/templates_.add-recipients'
+import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/documents_.create-from-template'
 
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
@@ -52,6 +53,12 @@ const TemplatesAddRecipientsRoute = TemplatesAddRecipientsRouteImport.update({
   path: '/templates/add-recipients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentsCreateFromTemplateRoute =
+  DocumentsCreateFromTemplateRouteImport.update({
+    id: '/documents_/create-from-template',
+    path: '/documents/create-from-template',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +77,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
 }
 export interface FileRoutesById {
@@ -79,6 +88,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/documents_/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/templates_/add-recipients': typeof TemplatesAddRecipientsRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +100,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/documents/create-from-template'
     | '/templates/add-recipients'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +110,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/documents/create-from-template'
     | '/templates/add-recipients'
   id:
     | '__root__'
@@ -108,6 +120,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/documents_/create-from-template'
     | '/templates_/add-recipients'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +131,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   SigninRoute: typeof SigninRoute
   TemplatesRoute: typeof TemplatesRoute
+  DocumentsCreateFromTemplateRoute: typeof DocumentsCreateFromTemplateRoute
   TemplatesAddRecipientsRoute: typeof TemplatesAddRecipientsRoute
 }
 
@@ -172,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TemplatesAddRecipientsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documents_/create-from-template': {
+      id: '/documents_/create-from-template'
+      path: '/documents/create-from-template'
+      fullPath: '/documents/create-from-template'
+      preLoaderRoute: typeof DocumentsCreateFromTemplateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -182,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SigninRoute: SigninRoute,
   TemplatesRoute: TemplatesRoute,
+  DocumentsCreateFromTemplateRoute: DocumentsCreateFromTemplateRoute,
   TemplatesAddRecipientsRoute: TemplatesAddRecipientsRoute,
 }
 export const routeTree = rootRouteImport

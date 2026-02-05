@@ -16,3 +16,6 @@ export * from './documents'
 
 // Template APIs
 export * from './templates'
+
+// Contact APIs
+export * from './contacts'
