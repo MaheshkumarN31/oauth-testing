@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as UserTypesRouteImport } from './routes/user-types'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -25,6 +27,16 @@ import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/docume
 const WorkspacesRoute = WorkspacesRouteImport.update({
   id: '/workspaces',
   path: '/workspaces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserTypesRoute = UserTypesRouteImport.update({
+  id: '/user-types',
+  path: '/user-types',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesRoute = TemplatesRouteImport.update({
@@ -93,6 +105,8 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/user-types': typeof UserTypesRoute
+  '/users': typeof UsersRoute
   '/workspaces': typeof WorkspacesRoute
   '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents/send': typeof DocumentsSendRoute
@@ -107,6 +121,8 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/user-types': typeof UserTypesRoute
+  '/users': typeof UsersRoute
   '/workspaces': typeof WorkspacesRoute
   '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents/send': typeof DocumentsSendRoute
@@ -122,6 +138,8 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/user-types': typeof UserTypesRoute
+  '/users': typeof UsersRoute
   '/workspaces': typeof WorkspacesRoute
   '/documents_/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents_/send': typeof DocumentsSendRoute
@@ -138,6 +156,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/user-types'
+    | '/users'
     | '/workspaces'
     | '/documents/create-from-template'
     | '/documents/send'
@@ -152,6 +172,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/user-types'
+    | '/users'
     | '/workspaces'
     | '/documents/create-from-template'
     | '/documents/send'
@@ -166,6 +188,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/user-types'
+    | '/users'
     | '/workspaces'
     | '/documents_/create-from-template'
     | '/documents_/send'
@@ -181,6 +205,8 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   SigninRoute: typeof SigninRoute
   TemplatesRoute: typeof TemplatesRoute
+  UserTypesRoute: typeof UserTypesRoute
+  UsersRoute: typeof UsersRoute
   WorkspacesRoute: typeof WorkspacesRoute
   DocumentsCreateFromTemplateRoute: typeof DocumentsCreateFromTemplateRoute
   DocumentsSendRoute: typeof DocumentsSendRoute
@@ -194,6 +220,20 @@ declare module '@tanstack/react-router' {
       path: '/workspaces'
       fullPath: '/workspaces'
       preLoaderRoute: typeof WorkspacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user-types': {
+      id: '/user-types'
+      path: '/user-types'
+      fullPath: '/user-types'
+      preLoaderRoute: typeof UserTypesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/templates': {
@@ -285,6 +325,8 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SigninRoute: SigninRoute,
   TemplatesRoute: TemplatesRoute,
+  UserTypesRoute: UserTypesRoute,
+  UsersRoute: UsersRoute,
   WorkspacesRoute: WorkspacesRoute,
   DocumentsCreateFromTemplateRoute: DocumentsCreateFromTemplateRoute,
   DocumentsSendRoute: DocumentsSendRoute,

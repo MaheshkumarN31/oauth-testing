@@ -11,6 +11,8 @@ import {
   Settings,
   Tag,
   Users,
+  Shield,
+  UserCog,
 } from 'lucide-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -199,6 +201,12 @@ export function AppSidebar({
       path: '/templates',
     },
     {
+      title: 'Documents',
+      icon: Briefcase,
+      href: `/documents?user_id=${userId}`,
+      path: '/documents',
+    },
+    {
       title: 'Contacts',
       icon: Users,
       href: `/contacts?user_id=${userId}`,
@@ -209,6 +217,18 @@ export function AppSidebar({
       icon: Tag,
       href: `/contact-types?user_id=${userId}`,
       path: '/contact-types',
+    },
+    {
+      title: 'Users',
+      icon: UserCog,
+      href: `/users?user_id=${userId}`,
+      path: '/users',
+    },
+    {
+      title: 'User Types',
+      icon: Shield,
+      href: `/user-types?user_id=${userId}`,
+      path: '/user-types',
     },
     {
       title: 'Workspaces',
