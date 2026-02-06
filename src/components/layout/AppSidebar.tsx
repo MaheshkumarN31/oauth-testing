@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Briefcase,
   Building2,
   Check,
   ChevronUp,
@@ -208,6 +209,12 @@ export function AppSidebar({
       icon: Tag,
       href: `/contact-types?user_id=${userId}`,
       path: '/contact-types',
+    },
+    {
+      title: 'Workspaces',
+      icon: Briefcase,
+      href: `/workspaces?user_id=${userId}`,
+      path: '/workspaces',
     },
     {
       title: 'Analytics',

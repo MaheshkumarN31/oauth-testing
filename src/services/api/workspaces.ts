@@ -58,7 +58,7 @@ export const createWorkspaceAPI = async (payload: {
 }): Promise<any> => {
   // eslint-disable-next-line no-useless-catch
   try {
-    const response = await $fetch.post('/api/workspaces/', payload)
+    const response = await $fetch.post('/api/workspaces', payload)
     return response
   } catch (err) {
     throw err
@@ -66,7 +66,8 @@ export const createWorkspaceAPI = async (payload: {
 }
 
 /**
- * Update workspace
+ * Update workspace (name, description)
+ * Endpoint: PATCH /api/workspaces/:id
  */
 export const updateWorkspaceAPI = async ({
   workspaceId,
@@ -77,7 +78,7 @@ export const updateWorkspaceAPI = async ({
 }): Promise<any> => {
   // eslint-disable-next-line no-useless-catch
   try {
-    const response = await $fetch.put(`/api/workspaces/${workspaceId}`, payload)
+    const response = await $fetch.patch(`/api/workspaces/${workspaceId}`, payload)
     return response
   } catch (err) {
     throw err
@@ -91,6 +92,28 @@ export const deleteWorkspaceAPI = async (workspaceId: string): Promise<any> => {
   // eslint-disable-next-line no-useless-catch
   try {
     const response = await $fetch.delete(`/api/workspaces/${workspaceId}`)
+    return response
+  } catch (err) {
+    throw err
+  }
+}
+
+/**
+ * Update workspace status
+ * Endpoint: PATCH /api/workspaces/:id
+ */
+export const updateWorkspaceStatusAPI = async ({
+  workspaceId,
+  status,
+}: {
+  workspaceId: string
+  status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'
+}): Promise<any> => {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const response = await $fetch.patch(`/api/workspaces/${workspaceId}`, {
+      status,
+    })
     return response
   } catch (err) {
     throw err

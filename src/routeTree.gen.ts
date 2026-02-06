@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkspacesRouteImport } from './routes/workspaces'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -21,6 +22,11 @@ import { Route as TemplatesAddRecipientsRouteImport } from './routes/templates_.
 import { Route as DocumentsSendRouteImport } from './routes/documents_.send'
 import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/documents_.create-from-template'
 
+const WorkspacesRoute = WorkspacesRouteImport.update({
+  id: '/workspaces',
+  path: '/workspaces',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
   path: '/templates',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/workspaces': typeof WorkspacesRoute
   '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/workspaces': typeof WorkspacesRoute
   '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/workspaces': typeof WorkspacesRoute
   '/documents_/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents_/send': typeof DocumentsSendRoute
   '/templates_/add-recipients': typeof TemplatesAddRecipientsRoute
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/workspaces'
     | '/documents/create-from-template'
     | '/documents/send'
     | '/templates/add-recipients'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/workspaces'
     | '/documents/create-from-template'
     | '/documents/send'
     | '/templates/add-recipients'
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/workspaces'
     | '/documents_/create-from-template'
     | '/documents_/send'
     | '/templates_/add-recipients'
@@ -169,6 +181,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   SigninRoute: typeof SigninRoute
   TemplatesRoute: typeof TemplatesRoute
+  WorkspacesRoute: typeof WorkspacesRoute
   DocumentsCreateFromTemplateRoute: typeof DocumentsCreateFromTemplateRoute
   DocumentsSendRoute: typeof DocumentsSendRoute
   TemplatesAddRecipientsRoute: typeof TemplatesAddRecipientsRoute
@@ -176,6 +189,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workspaces': {
+      id: '/workspaces'
+      path: '/workspaces'
+      fullPath: '/workspaces'
+      preLoaderRoute: typeof WorkspacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates': {
       id: '/templates'
       path: '/templates'
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SigninRoute: SigninRoute,
   TemplatesRoute: TemplatesRoute,
+  WorkspacesRoute: WorkspacesRoute,
   DocumentsCreateFromTemplateRoute: DocumentsCreateFromTemplateRoute,
   DocumentsSendRoute: DocumentsSendRoute,
   TemplatesAddRecipientsRoute: TemplatesAddRecipientsRoute,
