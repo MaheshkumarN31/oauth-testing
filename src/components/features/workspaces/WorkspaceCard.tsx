@@ -2,22 +2,16 @@ import { useState } from 'react'
 import {
     Building2,
     Edit2,
-    Trash2,
-    MoreVertical,
     Calendar,
     User,
+    Loader2,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
+import { useUpdateWorkspaceStatus } from '@/hooks/queries/useWorkspaces'
 
 interface WorkspaceCardProps {
     workspace: {
@@ -31,7 +25,6 @@ interface WorkspaceCardProps {
         updated_at?: string
     }
     onEdit: (workspace: any) => void
-    onDelete: (workspace: any) => void
 }
 
 const statusColors = {
@@ -49,10 +42,20 @@ const statusDotColors = {
 export function WorkspaceCard({
     workspace,
     onEdit,
-    onDelete,
 }: WorkspaceCardProps) {
     const [isHovered, setIsHovered] = useState(false)
     const status = workspace.status || 'ACTIVE'
+    const updateStatusMutation = useUpdateWorkspaceStatus()
+
+    const isActive = status === 'ACTIVE'
+
+    const handleStatusToggle = () => {
+        const newStatus = isActive ? 'INACTIVE' : 'ACTIVE'
+        updateStatusMutation.mutate({
+            workspaceId: workspace._id,
+            status: newStatus,
+        })
+    }
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'N/A'
@@ -62,6 +65,8 @@ export function WorkspaceCard({
             year: 'numeric',
         })
     }
+
+    const isUpdating = updateStatusMutation.isPending
 
     return (
         <Card
@@ -95,35 +100,18 @@ export function WorkspaceCard({
                         </div>
                     </div>
 
-                    {/* Actions Dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className={cn(
-                                    'h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity',
-                                    isHovered && 'opacity-100',
-                                )}
-                            >
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem onClick={() => onEdit(workspace)}>
-                                <Edit2 className="h-4 w-4 mr-2" />
-                                Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={() => onDelete(workspace)}
-                                className="text-destructive focus:text-destructive"
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    {/* Edit Button */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(workspace)}
+                        className={cn(
+                            'h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity',
+                            isHovered && 'opacity-100',
+                        )}
+                    >
+                        <Edit2 className="h-4 w-4" />
+                    </Button>
                 </div>
 
                 {/* Description */}
@@ -131,28 +119,49 @@ export function WorkspaceCard({
                     {workspace.description || 'No description provided'}
                 </p>
 
-                {/* Status Badge */}
-                <div className="flex items-center gap-2 mb-4">
-                    <Badge
-                        variant="outline"
-                        className={cn('font-medium', statusColors[status])}
-                    >
-                        <span
-                            className={cn(
-                                'h-2 w-2 rounded-full mr-1.5',
-                                statusDotColors[status],
-                            )}
-                        />
-                        {status}
-                    </Badge>
-                    {workspace.is_owner && (
+                {/* Status Badge & Toggle */}
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
                         <Badge
                             variant="outline"
-                            className="border-indigo-200 text-indigo-600 bg-indigo-50"
+                            className={cn('font-medium', statusColors[status])}
                         >
-                            Owner
+                            <span
+                                className={cn(
+                                    'h-2 w-2 rounded-full mr-1.5',
+                                    statusDotColors[status],
+                                )}
+                            />
+                            {status}
                         </Badge>
-                    )}
+                        {workspace.is_owner && (
+                            <Badge
+                                variant="outline"
+                                className="border-indigo-200 text-indigo-600 bg-indigo-50"
+                            >
+                                Owner
+                            </Badge>
+                        )}
+                    </div>
+
+                    {/* Status Toggle */}
+                    <div className="flex items-center gap-2">
+                        {isUpdating ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        ) : (
+                            <>
+                                <span className="text-xs text-muted-foreground">
+                                    {isActive ? 'Active' : 'Inactive'}
+                                </span>
+                                <Switch
+                                    checked={isActive}
+                                    onCheckedChange={handleStatusToggle}
+                                    disabled={isUpdating}
+                                    className="data-[state=checked]:bg-emerald-500"
+                                />
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 {/* Footer */}

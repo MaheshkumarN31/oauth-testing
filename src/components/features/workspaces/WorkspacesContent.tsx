@@ -8,7 +8,6 @@ import { useWorkspaces, useWorkspaceById } from '@/hooks/queries/useWorkspaces'
 import { WorkspaceCard } from './WorkspaceCard'
 import { CreateWorkspaceDialog } from './CreateWorkspaceDialog'
 import { EditWorkspaceDialog } from './EditWorkspaceDialog'
-import { DeleteWorkspaceDialog } from './DeleteWorkspaceDialog'
 
 interface WorkspaceData {
     _id: string
@@ -34,7 +33,6 @@ export function WorkspacesContent({
     // Dialog states
     const [createDialogOpen, setCreateDialogOpen] = useState(false)
     const [editDialogOpen, setEditDialogOpen] = useState(false)
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [selectedWorkspaceData, setSelectedWorkspaceData] =
         useState<WorkspaceData | null>(null)
 
@@ -69,11 +67,7 @@ export function WorkspacesContent({
         setEditDialogOpen(true)
     }
 
-    // Handle delete
-    const handleDelete = (workspace: WorkspaceData) => {
-        setSelectedWorkspaceData(workspace)
-        setDeleteDialogOpen(true)
-    }
+
 
     // Handle search by ID
     const handleSearchById = (value: string) => {
@@ -183,7 +177,6 @@ export function WorkspacesContent({
                                 key={workspace._id}
                                 workspace={workspace}
                                 onEdit={handleEdit}
-                                onDelete={handleDelete}
                             />
                         ))}
                     </div>
@@ -202,11 +195,7 @@ export function WorkspacesContent({
                 workspace={selectedWorkspaceData}
             />
 
-            <DeleteWorkspaceDialog
-                open={deleteDialogOpen}
-                onOpenChange={setDeleteDialogOpen}
-                workspace={selectedWorkspaceData}
-            />
+
         </>
     )
 }
