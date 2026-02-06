@@ -76,11 +76,11 @@ export function useUpdateUser() {
 /**
  * Delete user
  */
-export function useDeleteUser() {
+export function useDeleteUser(companyId?: string) {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (userId: string) => deleteUserAPI(userId),
+        mutationFn: (userId: string) => deleteUserAPI(userId, companyId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY })
             toast.success('User removed successfully')

@@ -53,12 +53,17 @@ export function InviteUserDialog({ open, onOpenChange, companyId }: InviteUserDi
 
         if (!formData.email.trim()) return
 
+        const fullName = `${formData.first_name} ${formData.last_name}`.trim() || formData.email.split('@')[0]
+
         inviteUserMutation.mutate(
             {
+                name: fullName,
                 email: formData.email,
                 first_name: formData.first_name || undefined,
                 last_name: formData.last_name || undefined,
                 role: formData.role,
+                roles: [formData.role],
+                user_type: formData.user_type_id ? [formData.user_type_id] : [],
                 user_type_id: formData.user_type_id || undefined,
                 company_id: companyId,
                 permissions: [],
@@ -68,6 +73,11 @@ export function InviteUserDialog({ open, onOpenChange, companyId }: InviteUserDi
                 locations: [],
                 branches: [],
                 tags: [],
+                workspace_ids: companyId ? [companyId] : [],
+                group_ids: [],
+                department_ids: [],
+                location_ids: [],
+                branch_ids: [],
             },
             {
                 onSuccess: () => {

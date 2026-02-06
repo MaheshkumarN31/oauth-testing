@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Plus, Search, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useUsers, useDeleteUser } from '@/hooks/queries/useUsers'
+import { useUsers } from '@/hooks/queries/useUsers'
 import { UserCard } from './UserCard'
 import { InviteUserDialog } from './InviteUserDialog'
 import { EditUserDialog } from './EditUserDialog'
+import { DeleteUserDialog } from './DeleteUserDialog'
 import type { User } from '@/types'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -17,18 +18,15 @@ export function UsersContent({ companyId }: UsersContentProps) {
     const [search, setSearch] = useState('')
     const [isInviteOpen, setIsInviteOpen] = useState(false)
     const [editingUser, setEditingUser] = useState<User | null>(null)
+    const [deletingUser, setDeletingUser] = useState<User | null>(null)
 
     const { data: users, isLoading } = useUsers({
         search: search || undefined,
         company_id: companyId || '',
     })
 
-    const deleteUserMutation = useDeleteUser()
-
     const handleDelete = (user: User) => {
-        if (confirm(`Are you sure you want to remove ${user.first_name} ${user.last_name}?`)) {
-            deleteUserMutation.mutate(user.id)
-        }
+        setDeletingUser(user)
     }
 
     const handleEdit = (user: User) => {
@@ -131,6 +129,13 @@ export function UsersContent({ companyId }: UsersContentProps) {
                 open={!!editingUser}
                 onOpenChange={(open) => !open && setEditingUser(null)}
                 user={editingUser}
+                companyId={companyId}
+            />
+
+            <DeleteUserDialog
+                open={!!deletingUser}
+                onOpenChange={(open) => !open && setDeletingUser(null)}
+                user={deletingUser}
                 companyId={companyId}
             />
         </div>

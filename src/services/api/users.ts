@@ -12,12 +12,15 @@ export interface UsersPayload {
 }
 
 export interface InviteUserPayload {
+    name: string
     email: string
     role: string
+    roles?: string[]
     first_name?: string
     last_name?: string
+    user_type?: string[]
     user_type_id?: string
-    company_id?: string // Optional if backend infers it, but good to have
+    company_id?: string
     permissions?: string[]
     workspaces?: string[]
     groups?: string[]
@@ -25,6 +28,11 @@ export interface InviteUserPayload {
     locations?: string[]
     branches?: string[]
     tags?: string[]
+    workspace_ids?: string[]
+    group_ids?: string[]
+    department_ids?: string[]
+    location_ids?: string[]
+    branch_ids?: string[]
 }
 
 /**
@@ -76,9 +84,9 @@ export const updateUserAPI = async ({
  * Delete/Remove user from company
  * Endpoint: DELETE /api/users/:id
  */
-export const deleteUserAPI = async (userId: string): Promise<any> => {
+export const deleteUserAPI = async (userId: string, company_id?: string): Promise<any> => {
     try {
-        const response = await $fetch.delete(`/api/users/${userId}`)
+        const response = await $fetch.delete(`/api/users/${userId}`, company_id ? { company_id } : undefined)
         return response
     } catch (err) {
         throw err
