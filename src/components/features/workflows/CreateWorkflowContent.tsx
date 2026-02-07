@@ -73,7 +73,7 @@ function TemplateSidebarItem({
       </div>
       <div className="min-w-0 flex-1">
         <p className={cn('text-sm font-medium truncate', isDisabled && 'text-muted-foreground')}>
-          {template.name}
+          {template.title || template.name}
         </p>
         <p className="text-xs text-muted-foreground truncate">
           {template.created_by_name ? `@${template.created_by_name}` : ''}
@@ -146,7 +146,7 @@ function StepCard({
           <FileText className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium truncate">{step.name}</p>
+          <p className="text-sm font-medium truncate">{step.title || step.name}</p>
           <p className="text-xs text-muted-foreground">{formatDate(step.created_at)}</p>
         </div>
 
@@ -220,9 +220,13 @@ export function CreateWorkflowContent({
   const { mutate: createWorkflow, isPending: isCreating } = useCreateWorkflow()
 
   const templates: Template[] = templatesData?.data || []
-  const filteredTemplates = templates.filter((t) =>
-    t.name?.toLowerCase().includes(templateSearch.toLowerCase()),
-  )
+  const filteredTemplates = templates.filter((t) => {
+    const searchLower = templateSearch.toLowerCase()
+    return (
+      t.name?.toLowerCase().includes(searchLower) ||
+      t.title?.toLowerCase().includes(searchLower)
+    )
+  })
 
   // Set of selected template IDs for O(1) lookups
   const selectedIds = new Set(selectedTemplates.map(getTemplateId))
@@ -240,7 +244,7 @@ export function CreateWorkflowContent({
     if (index === 0) return
     setSelectedTemplates((prev) => {
       const next = [...prev]
-      ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
+        ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
       return next
     })
   }
@@ -249,7 +253,7 @@ export function CreateWorkflowContent({
     if (index >= selectedTemplates.length - 1) return
     setSelectedTemplates((prev) => {
       const next = [...prev]
-      ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
+        ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
       return next
     })
   }
@@ -265,7 +269,7 @@ export function CreateWorkflowContent({
         steps: selectedTemplates.map((t, i) => ({
           step: i + 1,
           template_id: getTemplateId(t),
-          template_name: t.name,
+          template_name: t.title || t.name,
         })),
       },
       {
@@ -306,7 +310,7 @@ export function CreateWorkflowContent({
             ) : (
               <Zap className="mr-2 h-4 w-4" />
             )}
-            Save Workflow
+            Continue
           </Button>
         }
       />
@@ -432,7 +436,7 @@ export function CreateWorkflowContent({
                 </div>
               ) : (
                 <div>
-                  {templates.map((template) => {
+                  {filteredTemplates.map((template) => {
                     const tid = getTemplateId(template)
                     const isDisabled = selectedIds.has(tid)
                     return (
