@@ -149,10 +149,10 @@ export function AddRecipientsContent({
           console.log('DEBUG: Final URL with replaced token:', finalUrl)
         }
 
-        console.log('DEBUG: Opening redirect URL in new tab:', finalUrl)
-        window.open(finalUrl, '_blank')
+        console.log('DEBUG: Redirecting to URL in same tab:', finalUrl)
+        window.location.href = finalUrl
         sessionStorage.removeItem('template_redirect_url')
-        console.log('DEBUG: Redirect URL opened and removed from sessionStorage')
+        console.log('DEBUG: Redirect URL processed and removed from sessionStorage')
       } else {
         console.warn('DEBUG: No redirect URL found in sessionStorage')
       }
@@ -330,6 +330,11 @@ export function AddRecipientsContent({
         }
       })
 
+      const redirectUrl =
+        createResponse?.data?.data?.redirect_url ||
+        createResponse?.data?.redirect_url ||
+        createResponse?.redirect_url
+
       // Construct update payload matching API reference structure
       const updatePayload = {
         title: editableTemplateName,
@@ -338,6 +343,7 @@ export function AddRecipientsContent({
         fields: [],
         company_id: companyId,
         is_anyone_can_approve: false,
+        redirect_url: redirectUrl,
       }
 
       console.log('DEBUG: Update payload:', JSON.stringify(updatePayload, null, 2))
