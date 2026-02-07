@@ -44,7 +44,7 @@ export function useWorkflow(workflowId: string, enabled = true) {
     queryKey: [WORKFLOWS_QUERY_KEY, workflowId],
     queryFn: async () => {
       const response = await getWorkflowByIdAPI(workflowId)
-      return response.data
+      return response.data?.data || response.data
     },
     enabled: enabled && !!workflowId,
   })

@@ -12,7 +12,6 @@ import {
 } from 'lucide-react'
 import { PageHeader } from '@/components/common'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
     Select,
@@ -24,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useWorkflow, useContacts } from '@/hooks/queries'
+import { getTemplateByIdAPI } from '@/services/api/templates'
 import type { Workspace } from '@/types'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -53,6 +53,21 @@ function RecipientRow({
 }: RecipientRowProps) {
     const isSender = recipient.role?.toLowerCase() === 'sender'
 
+    // Filter contacts based on recipient role (contact type)
+    // We try to match recipient.role with contact.contact_type
+    const filteredContacts = isSender
+        ? []
+        : contacts.filter(c =>
+            c.contact_type?.toLowerCase() === recipient.role?.toLowerCase()
+        )
+
+    // If no specific contacts found for this type, or if role is generic, we might want to show all?
+    // User request: "show that contact type emails". Implies strict filtering.
+    // However, if the list is empty, maybe fallback to all or show distinct message.
+    // For now, let's use all contacts if filtered list is empty, but sort matches to top?
+    // Actually, sticking to strict filtering is safer as per request.
+    const displayContacts = filteredContacts.length > 0 ? filteredContacts : contacts
+
     return (
         <div className="group relative bg-white border border-border/60 rounded-xl p-4 transition-all hover:shadow-md hover:border-indigo-200/60 duration-300 mb-3">
             {/* Visual indicator bar */}
@@ -61,107 +76,97 @@ function RecipientRow({
                 isSender ? "bg-slate-400" : "bg-indigo-500 group-hover:bg-indigo-600"
             )} />
 
-            <div className="flex flex-col gap-4 pl-2">
-                {/* Top row: Role badge and basic info */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className={cn(
-                            "flex items-center justify-center w-8 h-8 rounded-lg",
-                            isSender ? "bg-slate-100 text-slate-500" : "bg-indigo-50 text-indigo-600"
-                        )}>
-                            <Users className="w-4 h-4" />
-                        </div>
+            <div className="flex flex-col gap-4 pl-4">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 
-                        <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
-                                <span className="font-semibold text-sm text-foreground">
-                                    {recipient.role || `Recipient ${recipientIndex + 1}`}
-                                </span>
-                                {isSender && (
-                                    <Badge variant="secondary" className="text-[10px] h-4 px-1.5 bg-slate-100 text-slate-500">
-                                        SENDER
-                                    </Badge>
-                                )}
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                                Involved in: <span className="font-medium text-indigo-600/80">{template.template_id?.title || template.template_id?.name || 'Unknown Template'}</span>
-                            </span>
+                    {/* Role / Contact Type - 2 cols */}
+                    <div className="md:col-span-2 flex items-center gap-3">
+                        <Checkbox
+                            className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
+                            checked={!!recipient.email}
+                            disabled
+                        />
+                        <div className={cn(
+                            "px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-2 truncate max-w-full",
+                            isSender
+                                ? "bg-slate-100 text-slate-600 border-slate-200"
+                                : "bg-green-50 text-green-700 border-green-200"
+                        )}>
+                            {isSender ? <Users className="w-3 h-3" /> : null}
+                            <span className="truncate">{recipient.role || `Recipient ${recipientIndex + 1}`}</span>
                         </div>
                     </div>
-                </div>
 
-                {/* Input fields row */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    {/* Email/Contact Selection - 5 cols */}
-                    <div className="md:col-span-5">
+                    {/* Email Selection - 3 cols */}
+                    <div className="md:col-span-3">
                         {isSender ? (
-                            <div className="relative">
-                                <div className="flex items-center h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-muted-foreground">
-                                    {recipient.email || "Current User (You)"}
-                                </div>
+                            <div className="text-sm text-muted-foreground px-3 py-2 bg-slate-50 border rounded-md truncate">
+                                {recipient.email || "Current User"}
                             </div>
                         ) : (
-                            <div className="relative">
-                                <Select
-                                    disabled={isLoadingContacts}
-                                    value={recipient.selected_contact_id || ""}
-                                    onValueChange={(val) => {
-                                        const contact = contacts.find(c => c._id === val || c.id === val);
-                                        if (contact) {
-                                            onUpdate('selected_contact_id', val);
-                                            onUpdate('email', contact.email);
-                                            onUpdate('first_name', contact.first_name);
-                                            onUpdate('last_name', contact.last_name);
-                                        }
-                                    }}
-                                >
-                                    <SelectTrigger className="h-10 bg-white border-border/80 focus:ring-2 focus:ring-indigo-100 transition-all">
-                                        <SelectValue placeholder="Select a contact" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {contacts.map((contact: any) => (
-                                            <SelectItem key={contact._id || contact.id} value={contact._id || contact.id}>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] text-indigo-600 font-bold">
-                                                        {contact.first_name?.[0]}{contact.last_name?.[0]}
-                                                    </div>
-                                                    <span>{contact.first_name} {contact.last_name}</span>
-                                                    <span className="text-muted-foreground text-xs ml-1">({contact.email})</span>
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            <Select
+                                disabled={isLoadingContacts}
+                                value={recipient.selected_contact_id || ""}
+                                onValueChange={(val) => {
+                                    const contact = contacts.find(c => c._id === val || c.id === val);
+                                    if (contact) {
+                                        onUpdate('selected_contact_id', val);
+                                        onUpdate('email', contact.email);
+                                        onUpdate('first_name', contact.first_name);
+                                        onUpdate('last_name', contact.last_name);
+                                    }
+                                }}
+                            >
+                                <SelectTrigger className="h-10 bg-white border-border/80 focus:ring-2 focus:ring-indigo-100 transition-all">
+                                    <SelectValue placeholder="Select Email" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {displayContacts.map((contact: any) => (
+                                        <SelectItem key={contact._id || contact.id} value={contact._id || contact.id}>
+                                            <div className="flex items-center gap-2">
+                                                <span>{contact.email}</span>
+                                                {contact.first_name && <span className="text-muted-foreground text-xs">({contact.first_name} {contact.contact_type})</span>}
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                    {displayContacts.length === 0 && (
+                                        <div className="p-2 text-xs text-muted-foreground text-center">No contacts found for {recipient.role}</div>
+                                    )}
+                                </SelectContent>
+                            </Select>
                         )}
                     </div>
 
-                    {/* First Name - 3.5 cols */}
-                    <div className="md:col-span-3">
+                    {/* First Name - 2 cols */}
+                    <div className="md:col-span-2">
                         <Input
                             placeholder="First Name"
                             value={recipient.first_name || ''}
                             onChange={(e) => onUpdate('first_name', e.target.value)}
                             disabled={isSender}
-                            className={cn(
-                                "h-10 transition-all",
-                                isSender && "bg-slate-50 text-muted-foreground border-slate-200"
-                            )}
+                            className="h-10 bg-white"
                         />
                     </div>
 
-                    {/* Last Name - 3.5 cols */}
-                    <div className="md:col-span-4">
+                    {/* Last Name - 2 cols */}
+                    <div className="md:col-span-2">
                         <Input
                             placeholder="Last Name"
                             value={recipient.last_name || ''}
                             onChange={(e) => onUpdate('last_name', e.target.value)}
                             disabled={isSender}
-                            className={cn(
-                                "h-10 transition-all",
-                                isSender && "bg-slate-50 text-muted-foreground border-slate-200"
-                            )}
+                            className="h-10 bg-white"
                         />
+                    </div>
+
+                    {/* Involved Templates - 3 cols */}
+                    <div className="md:col-span-3 flex flex-col justify-center">
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">
+                            Involved In The Following Template
+                        </span>
+                        <div className="text-xs font-medium text-foreground truncate" title={template.template_id?.title}>
+                            {template.template_id?.title}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -182,7 +187,8 @@ export function WorkflowConfigureContent({
     // Since useContacts is what we have, let's use it.
     const { data: contactsData, isLoading: contactsLoading } = useContacts({
         companyId: companyId || '',
-        enabled: !!companyId
+        enabled: !!companyId,
+        limit: 1000
     })
 
     const [recipients, setRecipients] = useState<any[]>([])
@@ -191,58 +197,99 @@ export function WorkflowConfigureContent({
 
     // Initialize state when workflow data loads
     useEffect(() => {
-        if (workflowData && !isInitialized) {
-            // Flatten the structure: We need to iterate through document_templates 
-            // and then document_users to build a flat list of recipients to display.
-            // However, the UI design suggests grouping by "Recipient Details".
-            // If a recipient appears involved in multiple templates, we might want to merge them if possible?
-            // For now, let's just map them as they come from the API structure.
+        const fetchTemplateDetails = async () => {
+            if (workflowData?._id) {
+                try {
+                    // Use document_templates if available, otherwise use steps
+                    let templates = workflowData.document_templates || []
+                    if (templates.length === 0 && workflowData.steps) {
+                        templates = workflowData.steps
+                    }
 
-            const initialRecipients: any[] = []
+                    // If we have already initialized for this workflow and have recipients, maybe skip?
+                    // But if recipients is empty, we should try again.
+                    // For now, let's just run it if we have templates.
 
-            // Check if workflowData has document_templates
-            const templates = workflowData.document_templates || []
+                    const initialRecipients: any[] = []
 
-            templates.forEach((tmpl: any) => {
-                const users = tmpl.template_id?.document_users || []
-                users.forEach((user: any) => {
-                    // We'll add a reference to the template for display purposes
-                    initialRecipients.push({
-                        ...user,
-                        _templateId: tmpl.template_id?._id,
-                        _templateName: tmpl.template_id?.title || tmpl.template_id?.name,
-                        // unique ID for key
-                        _uiId: Math.random().toString(36).substring(7)
+                    // Fetch full details for each template to get document_users
+                    const templatePromises = templates.map(async (tmpl: any) => {
+                        const templateId = tmpl.template_id?._id || tmpl.template_id
+                        if (!templateId) return null
+
+                        try {
+                            const response = await getTemplateByIdAPI({
+                                templateId,
+                                queryParams: { company_id: companyId || '' }
+                            })
+                            // Ensure we get the correct data object
+                            const templateData = response.data?.data || response.data || response
+
+                            return {
+                                ...templateData,
+                                _originalTmpl: tmpl // keep reference to workflow link if needed
+                            }
+                        } catch (err) {
+                            console.error(`Failed to fetch template ${templateId}`, err)
+                            return null
+                        }
                     })
-                })
-            })
 
-            setRecipients(initialRecipients)
-            setEnforceOrder(workflowData.enforce_signature_order || false)
-            setIsInitialized(true)
+                    const fetchedTemplates = await Promise.all(templatePromises)
+                    const validTemplates = fetchedTemplates.filter(Boolean)
+
+                    console.log("Fetched templates:", validTemplates) // Debug log
+
+                    validTemplates.forEach((templateData: any) => {
+                        const users = templateData.document_users || []
+                        users.forEach((user: any) => {
+                            initialRecipients.push({
+                                ...user,
+                                _templateId: templateData._id || templateData.id,
+                                _templateName: templateData.title || templateData.name,
+                                _uiId: Math.random().toString(36).substring(7)
+                            })
+                        })
+                    })
+
+                    console.log("Initial recipients:", initialRecipients) // Debug log
+
+                    setRecipients(initialRecipients)
+                    setEnforceOrder(workflowData.enforce_signature_order || false)
+                    setIsInitialized(true)
+                } catch (error) {
+                    console.error("Error initializing workflow configuration:", error)
+                    toast.error("Failed to load template details")
+                }
+            }
         }
-    }, [workflowData, isInitialized])
 
-    // Group recipients by role to avoid duplicates if the same role is used across templates?
-    // The user request shows "Involved in the following template: i-9, i-9 - Copy".
-    // This implies merging recipients with the same role/signer type.
+        fetchTemplateDetails()
+    }, [workflowData?._id, companyId]) // Depend on ID instead of object identity
 
+
+    // Group recipients by role to avoid duplicates
     const groupedRecipients = recipients.reduce((acc: any[], curr) => {
-        const existing = acc.find(r => r.role === curr.role && r.type === curr.type)
+        // Normalize role/contact_type for comparison
+        const currRole = (curr.role || curr.contact_type || '').toLowerCase()
+        const existing = acc.find(r => (r.role || r.contact_type || '').toLowerCase() === currRole)
+
         if (existing) {
-            // Append template name to the existing record for display
-            existing._involvedTemplates = existing._involvedTemplates
-                ? `${existing._involvedTemplates}, ${curr._templateName}`
-                : curr._templateName
+            // Append template name to the existing record for display if not already there
+            if (!existing._involvedTemplates?.includes(curr._templateName)) {
+                existing._involvedTemplates = existing._involvedTemplates
+                    ? `${existing._involvedTemplates}, ${curr._templateName}`
+                    : curr._templateName
+            }
         } else {
             acc.push({
                 ...curr,
+                role: curr.role || curr.contact_type, // Ensure role is set
                 _involvedTemplates: curr._templateName
             })
         }
         return acc
     }, [])
-
     const handleUpdateRecipient = (role: string, field: string, value: any) => {
         setRecipients(prev => prev.map(r => {
             if (r.role === role) {
@@ -327,7 +374,7 @@ export function WorkflowConfigureContent({
                             <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
                                 <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100/80 border border-slate-200/60">
                                     <FileText className="w-3.5 h-3.5" />
-                                    {workflowData?.document_templates_count || 0} Documents
+                                    {workflowData?.document_templates_count || workflowData?.steps?.length || 0} Documents
                                 </span>
                                 <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100/80 border border-slate-200/60">
                                     <Users className="w-3.5 h-3.5" />
