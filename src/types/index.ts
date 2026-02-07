@@ -229,6 +229,28 @@ export const ROLE_OPTIONS = [
   { label: 'CC', value: 'cc' },
 ]
 
+export interface Workflow {
+  _id: string
+  id?: string
+  name: string
+  description?: string
+  company_id: string
+  template_id?: string
+  template_name?: string
+  status?: string
+  steps?: any[]
+  created_by?: string
+  updated_by?: string
+  created_at?: string
+  updated_at?: string
+  [key: string]: any
+}
+
+export interface WorkflowsResponse {
+  workflows: Array<Workflow>
+  total: number
+}
+
 export type FileUploadStatusType =
   | 'uploading'
   | 'success'

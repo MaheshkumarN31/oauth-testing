@@ -5,6 +5,7 @@ import {
   Check,
   ChevronUp,
   FolderOpen,
+  GitBranch,
   LayoutDashboard,
   LogOut,
   Plus,
@@ -201,6 +202,12 @@ export function AppSidebar({
       path: '/templates',
     },
     {
+      title: 'Workflows',
+      icon: GitBranch,
+      href: `/workflows?user_id=${userId}`,
+      path: '/workflows',
+    },
+    {
       title: 'Documents',
       icon: Briefcase,
       href: `/documents?user_id=${userId}`,
@@ -276,7 +283,7 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
-                const isActive = location.pathname === item.path
+                const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton

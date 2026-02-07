@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
+import { Route as WorkflowsRouteImport } from './routes/workflows'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as UserTypesRouteImport } from './routes/user-types'
 import { Route as TemplatesRouteImport } from './routes/templates'
@@ -20,6 +21,7 @@ import { Route as ContactTypesRouteImport } from './routes/contact-types'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthCheckRouteImport } from './routes/auth-check'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkflowsCreateRouteImport } from './routes/workflows_.create'
 import { Route as TemplatesAddRecipientsRouteImport } from './routes/templates_.add-recipients'
 import { Route as DocumentsSendRouteImport } from './routes/documents_.send'
 import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/documents_.create-from-template'
@@ -27,6 +29,11 @@ import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/docume
 const WorkspacesRoute = WorkspacesRouteImport.update({
   id: '/workspaces',
   path: '/workspaces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkflowsRoute = WorkflowsRouteImport.update({
+  id: '/workflows',
+  path: '/workflows',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UsersRoute = UsersRouteImport.update({
@@ -79,6 +86,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkflowsCreateRoute = WorkflowsCreateRouteImport.update({
+  id: '/workflows_/create',
+  path: '/workflows/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesAddRecipientsRoute = TemplatesAddRecipientsRouteImport.update({
   id: '/templates_/add-recipients',
   path: '/templates/add-recipients',
@@ -107,10 +119,12 @@ export interface FileRoutesByFullPath {
   '/templates': typeof TemplatesRoute
   '/user-types': typeof UserTypesRoute
   '/users': typeof UsersRoute
+  '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
   '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
+  '/workflows/create': typeof WorkflowsCreateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,10 +137,12 @@ export interface FileRoutesByTo {
   '/templates': typeof TemplatesRoute
   '/user-types': typeof UserTypesRoute
   '/users': typeof UsersRoute
+  '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
   '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
+  '/workflows/create': typeof WorkflowsCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,10 +156,12 @@ export interface FileRoutesById {
   '/templates': typeof TemplatesRoute
   '/user-types': typeof UserTypesRoute
   '/users': typeof UsersRoute
+  '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
   '/documents_/create-from-template': typeof DocumentsCreateFromTemplateRoute
   '/documents_/send': typeof DocumentsSendRoute
   '/templates_/add-recipients': typeof TemplatesAddRecipientsRoute
+  '/workflows_/create': typeof WorkflowsCreateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -158,10 +176,12 @@ export interface FileRouteTypes {
     | '/templates'
     | '/user-types'
     | '/users'
+    | '/workflows'
     | '/workspaces'
     | '/documents/create-from-template'
     | '/documents/send'
     | '/templates/add-recipients'
+    | '/workflows/create'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,10 +194,12 @@ export interface FileRouteTypes {
     | '/templates'
     | '/user-types'
     | '/users'
+    | '/workflows'
     | '/workspaces'
     | '/documents/create-from-template'
     | '/documents/send'
     | '/templates/add-recipients'
+    | '/workflows/create'
   id:
     | '__root__'
     | '/'
@@ -190,10 +212,12 @@ export interface FileRouteTypes {
     | '/templates'
     | '/user-types'
     | '/users'
+    | '/workflows'
     | '/workspaces'
     | '/documents_/create-from-template'
     | '/documents_/send'
     | '/templates_/add-recipients'
+    | '/workflows_/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -207,10 +231,12 @@ export interface RootRouteChildren {
   TemplatesRoute: typeof TemplatesRoute
   UserTypesRoute: typeof UserTypesRoute
   UsersRoute: typeof UsersRoute
+  WorkflowsRoute: typeof WorkflowsRoute
   WorkspacesRoute: typeof WorkspacesRoute
   DocumentsCreateFromTemplateRoute: typeof DocumentsCreateFromTemplateRoute
   DocumentsSendRoute: typeof DocumentsSendRoute
   TemplatesAddRecipientsRoute: typeof TemplatesAddRecipientsRoute
+  WorkflowsCreateRoute: typeof WorkflowsCreateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -220,6 +246,13 @@ declare module '@tanstack/react-router' {
       path: '/workspaces'
       fullPath: '/workspaces'
       preLoaderRoute: typeof WorkspacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workflows': {
+      id: '/workflows'
+      path: '/workflows'
+      fullPath: '/workflows'
+      preLoaderRoute: typeof WorkflowsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/users': {
@@ -292,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workflows_/create': {
+      id: '/workflows_/create'
+      path: '/workflows/create'
+      fullPath: '/workflows/create'
+      preLoaderRoute: typeof WorkflowsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates_/add-recipients': {
       id: '/templates_/add-recipients'
       path: '/templates/add-recipients'
@@ -327,10 +367,12 @@ const rootRouteChildren: RootRouteChildren = {
   TemplatesRoute: TemplatesRoute,
   UserTypesRoute: UserTypesRoute,
   UsersRoute: UsersRoute,
+  WorkflowsRoute: WorkflowsRoute,
   WorkspacesRoute: WorkspacesRoute,
   DocumentsCreateFromTemplateRoute: DocumentsCreateFromTemplateRoute,
   DocumentsSendRoute: DocumentsSendRoute,
   TemplatesAddRecipientsRoute: TemplatesAddRecipientsRoute,
+  WorkflowsCreateRoute: WorkflowsCreateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
