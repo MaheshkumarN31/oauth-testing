@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
@@ -54,19 +53,13 @@ function RecipientRow({
 }: RecipientRowProps) {
     const isSender = recipient.role?.toLowerCase() === 'sender'
 
-    // Filter contacts based on recipient role (contact type)
-    // We try to match recipient.role with contact.contact_type
+    // Filter contacts based on recipient contact_type (ObjectId)
     const filteredContacts = isSender
         ? []
         : contacts.filter(c =>
-            c.contact_type?.toLowerCase() === recipient.role?.toLowerCase()
+            c.contact_type === recipient.contact_type
         )
 
-    // If no specific contacts found for this type, or if role is generic, we might want to show all?
-    // User request: "show that contact type emails". Implies strict filtering.
-    // However, if the list is empty, maybe fallback to all or show distinct message.
-    // For now, let's use all contacts if filtered list is empty, but sort matches to top?
-    // Actually, sticking to strict filtering is safer as per request.
     const displayContacts = filteredContacts.length > 0 ? filteredContacts : contacts
 
     return (
@@ -115,6 +108,10 @@ function RecipientRow({
                                         onUpdate('email', contact.email);
                                         onUpdate('first_name', contact.first_name);
                                         onUpdate('last_name', contact.last_name);
+                                        onUpdate('phone', contact.phone || '');
+                                        onUpdate('address', contact.address || '');
+                                        onUpdate('title', contact.title || '');
+                                        onUpdate('company_name', contact.company_name || '');
                                     }
                                 }}
                             >
@@ -183,9 +180,6 @@ export function WorkflowConfigureContent({
     const companyId = selectedWorkspace?._id
 
     const { data: workflowData, isLoading: workflowLoading, error: workflowError } = useWorkflow(workflowId)
-    // We'll need a way to fetch contacts. For now, let's fetch all contacts for simplicity, 
-    // but ideally we should fetch based on contact types if specified in the template.
-    // Since useContacts is what we have, let's use it.
     const { data: contactsData, isLoading: contactsLoading } = useContacts({
         companyId: companyId || '',
         enabled: !!companyId,
@@ -195,6 +189,7 @@ export function WorkflowConfigureContent({
     const [recipients, setRecipients] = useState<any[]>([])
     const [enforceOrder, setEnforceOrder] = useState(false)
     const [isInitialized, setIsInitialized] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Initialize state when workflow data loads
     useEffect(() => {
@@ -207,28 +202,72 @@ export function WorkflowConfigureContent({
                         templates = workflowData.steps
                     }
 
-                    // If we have already initialized for this workflow and have recipients, maybe skip?
-                    // But if recipients is empty, we should try again.
-                    // For now, let's just run it if we have templates.
+                    console.log("Raw workflow templates:", templates)
+
+                    // Filter only active templates from the workflow
+                    templates = templates.filter((tmpl: any) => {
+                        // Check various active status fields
+                        if (tmpl.is_active === false) return false
+                        if (tmpl.status && tmpl.status !== 'ACTIVE' && tmpl.status !== 'active') return false
+                        // Check populated template_id status
+                        if (tmpl.template_id?.status && tmpl.template_id.status !== 'ACTIVE' && tmpl.template_id.status !== 'active') return false
+                        return true
+                    })
+
+                    console.log("Active workflow templates:", templates)
 
                     const initialRecipients: any[] = []
 
                     // Fetch full details for each template to get document_users
                     const templatePromises = templates.map(async (tmpl: any) => {
-                        const templateId = tmpl.template_id?._id || tmpl.template_id
-                        if (!templateId) return null
+                        const templateId = tmpl.template_id?._id || tmpl.template_id || tmpl._id || tmpl.id
+                        if (!templateId) {
+                            console.warn("Skipping template with no ID:", tmpl)
+                            return null
+                        }
 
                         try {
                             const response = await getTemplateByIdAPI({
                                 templateId,
                                 queryParams: { company_id: companyId || '' }
                             })
-                            // Ensure we get the correct data object
-                            const templateData = response.data?.data || response.data || response
+
+                            // Handle nested response structure: response.data.data.data
+                            let templateData = null
+
+                            if (response.data?.data?.data) {
+                                templateData = response.data.data.data
+                            } else if (response.data?.data) {
+                                templateData = response.data.data
+                            } else if (response.data) {
+                                templateData = response.data
+                            } else {
+                                templateData = response
+                            }
+
+                            console.log(`Template ${templateId} fetched:`, {
+                                _id: templateData?._id,
+                                id: templateData?.id,
+                                title: templateData?.title,
+                                status: templateData?.status,
+                                is_active: templateData?.is_active,
+                                document_users_count: templateData?.document_users?.length
+                            })
+
+                            // Skip inactive templates
+                            if (templateData?.is_active === false) {
+                                console.warn(`Skipping inactive template: ${templateId}`)
+                                return null
+                            }
+                            if (templateData?.status && templateData.status !== 'ACTIVE' && templateData.status !== 'active') {
+                                console.warn(`Skipping template with status ${templateData.status}: ${templateId}`)
+                                return null
+                            }
 
                             return {
                                 ...templateData,
-                                _originalTmpl: tmpl // keep reference to workflow link if needed
+                                _originalTmpl: tmpl,
+                                _resolvedTemplateId: templateId // fallback ID
                             }
                         } catch (err) {
                             console.error(`Failed to fetch template ${templateId}`, err)
@@ -239,21 +278,26 @@ export function WorkflowConfigureContent({
                     const fetchedTemplates = await Promise.all(templatePromises)
                     const validTemplates = fetchedTemplates.filter(Boolean)
 
-                    console.log("Fetched templates:", validTemplates) // Debug log
+                    console.log("Fetched active templates:", validTemplates.map((t: any) => ({
+                        _id: t._id, id: t.id, title: t.title, status: t.status, _resolvedTemplateId: t._resolvedTemplateId
+                    })))
 
                     validTemplates.forEach((templateData: any) => {
                         const users = templateData.document_users || []
+                        const resolvedId = templateData._id || templateData.id || templateData._resolvedTemplateId
                         users.forEach((user: any) => {
                             initialRecipients.push({
                                 ...user,
-                                _templateId: templateData._id || templateData.id,
+                                _templateId: resolvedId,
                                 _templateName: templateData.title || templateData.name,
                                 _uiId: Math.random().toString(36).substring(7)
                             })
                         })
                     })
 
-                    console.log("Initial recipients:", initialRecipients) // Debug log
+                    console.log("Initial recipients with template IDs:", initialRecipients.map((r: any) => ({
+                        role: r.role, contact_type_name: r.contact_type_name, _templateId: r._templateId, _templateName: r._templateName
+                    })))
 
                     setRecipients(initialRecipients)
                     setEnforceOrder(workflowData.enforce_signature_order || false)
@@ -261,22 +305,36 @@ export function WorkflowConfigureContent({
                 } catch (error) {
                     console.error("Error initializing workflow configuration:", error)
                     toast.error("Failed to load template details")
+                    setIsInitialized(false)
                 }
             }
         }
 
         fetchTemplateDetails()
-    }, [workflowData?._id, companyId]) // Depend on ID instead of object identity
-
+    }, [workflowData?._id, companyId])
 
     // Group recipients by role to avoid duplicates
     const groupedRecipients = recipients.reduce((acc: any[], curr) => {
-        // Normalize role/contact_type for comparison
-        const currRole = (curr.role || curr.contact_type || '').toLowerCase()
-        const existing = acc.find(r => (r.role || r.contact_type || '').toLowerCase() === currRole)
+        const currRole = (curr.contact_type_name || curr.role || curr.contact_type || '').toLowerCase()
+        const existing = acc.find(r => (r.contact_type_name || r.role || r.contact_type || '').toLowerCase() === currRole)
 
         if (existing) {
-            // Append template name to the existing record for display if not already there
+            // Add this template to the existing role's templates array if not already there
+            const templateExists = existing.templates?.some(
+                (t: any) => t.template_id === curr._templateId
+            )
+
+            if (!templateExists) {
+                if (!existing.templates) {
+                    existing.templates = []
+                }
+                existing.templates.push({
+                    user_type: curr.user_type || 'SIGNER',
+                    template_id: curr._templateId,
+                    template_name: curr._templateName
+                })
+            }
+
             if (!existing._involvedTemplates?.includes(curr._templateName)) {
                 existing._involvedTemplates = existing._involvedTemplates
                     ? `${existing._involvedTemplates}, ${curr._templateName}`
@@ -285,15 +343,22 @@ export function WorkflowConfigureContent({
         } else {
             acc.push({
                 ...curr,
-                role: curr.role || curr.contact_type, // Ensure role is set
+                role: curr.contact_type_name || curr.role || curr.contact_type,
+                templates: [{
+                    user_type: curr.user_type || 'SIGNER',
+                    template_id: curr._templateId,
+                    template_name: curr._templateName
+                }],
                 _involvedTemplates: curr._templateName
             })
         }
         return acc
     }, [])
+
     const handleUpdateRecipient = (role: string, field: string, value: any) => {
         setRecipients(prev => prev.map(r => {
-            if (r.role === role) {
+            const rKey = (r.contact_type_name || r.role || r.contact_type || '').toLowerCase()
+            if (rKey === role.toLowerCase()) {
                 return { ...r, [field]: value }
             }
             return r
@@ -303,12 +368,16 @@ export function WorkflowConfigureContent({
     const contacts = Array.isArray(contactsData) ? contactsData : []
 
     const handleContinue = async () => {
+        // Check if initialized
+        if (!isInitialized) {
+            toast.error('Please wait, still loading templates...')
+            return
+        }
+
         // Validate recipients
         const incompleteRecipients = groupedRecipients.filter(r => {
-            const isSender = (r.role || r.contact_type || '').toLowerCase() === 'sender'
-            // Skip validation for sender as they are current user
+            const isSender = (r.contact_type_name || r.role || '').toLowerCase() === 'sender'
             if (isSender) return false
-
             return !r.email || !r.selected_contact_id
         })
 
@@ -317,65 +386,53 @@ export function WorkflowConfigureContent({
             return
         }
 
-        console.log("Validation passed. Creating workflow response...", { recipients, groupedRecipients })
+        setIsSubmitting(true)
 
         try {
             toast.loading('Creating workflow response...')
 
-            // Construct workflow_users payload
-            // We need to group back by unique user (email/contact_id) and aggregate templates
-            const usersMap = new Map<string, any>()
-
-            // Iterate through ALL flattened recipients to build the user list with templates
-            recipients.forEach(r => {
-                // Key by role since we grouped by role in the UI and allow selecting one contact per role
-                // Wait, if the user modifies a grouped recipient in the UI, we update 'recipients' state?
-                // The 'handleUpdateRecipient' updates 'recipients' state.
-                // But the 'groupedRecipients' is derived.
-                // If I update 'recipients' based on role matches, all recipients with that role get updated.
-                // So all instances of "Signer" get the same email/contact_id.
-                // This is correct behavior for "Role-based" assignment.
-
-                const key = r.role || r.contact_type
-                if (!usersMap.has(key)) {
-                    usersMap.set(key, {
-                        ...r, // contains contact info (email, id, etc)
-                        templates: []
-                    })
-                }
-
-                const userObj = usersMap.get(key)
-                userObj.templates.push({
-                    user_type: r.user_type || 'SIGNER', // Default to SIGNER?
-                    template_id: r._templateId,
-                    template_name: r._templateName
+            // Build workflow_users from groupedRecipients, filtering out senders
+            const workflowUsers = groupedRecipients
+                .filter(r => {
+                    const roleName = (r.contact_type_name || r.role || '').toLowerCase()
+                    return roleName !== 'sender'
                 })
+                .map((u, index) => {
+                    // Filter templates to only include ones with valid template_id
+                    const validTemplates = (u.templates || []).filter(
+                        (t: any) => t.template_id != null
+                    )
+
+                    return {
+                        e_signature_required: u.e_signature_required ?? false,
+                        value: u.value || `RECEIVER_${index + 1}`,
+                        name: u.name || "",
+                        email: u.email,
+                        first_name: u.first_name,
+                        last_name: u.last_name,
+                        type: u.type || 'RECEIVER',
+                        user_type: u.user_type || 'SIGNER',
+                        contact_type: u.contact_type,
+                        role: u.contact_type_name || u.role,
+                        templates: validTemplates,
+                        user_types: u.user_types || [],
+                        errors: {},
+                        contact_id: u.selected_contact_id || u.contact_id,
+                        phone: u.phone || '',
+                        address: u.address || '',
+                        title: u.title || '',
+                        company_name: u.company_name || '',
+                        full_name: `${u.first_name || ''} ${u.last_name || ''}`.trim()
+                    }
+                })
+                // Filter out users that have no valid templates
+                .filter(u => u.templates.length > 0)
+
+            console.log("Workflow users with templates:")
+            workflowUsers.forEach(user => {
+                console.log(`- ${user.role}: ${user.templates.length} templates`, user.templates)
             })
 
-            const workflowUsers = Array.from(usersMap.values()).map(u => ({
-                e_signature_required: u.e_signature_required ?? false, // Default false or from user data?
-                value: u.value || u.role || `RECEIVER_${Math.random()}`, // value seems to be an ID or code? The payload has RECEIVER_1
-                name: u.name || "",
-                email: u.email,
-                first_name: u.first_name,
-                last_name: u.last_name,
-                type: u.type || 'RECEIVER',
-                user_type: u.user_type || 'SIGNER',
-                contact_type: u.contact_type, // Maintain the original contact_type ID/String
-                role: u.role,
-                templates: u.templates,
-                user_types: u.user_types || [],
-                errors: {},
-                contact_id: u.selected_contact_id || u.contact_id || u._id || u.id, // Ensure we send contact_id
-                phone: u.phone,
-                address: u.address,
-                title: u.title,
-                company_name: u.company_name,
-                full_name: `${u.first_name || ''} ${u.last_name || ''}`.trim()
-            }))
-
-            // Identify primary user - For now take the first one?
-            // User payload example shows primary_user is same as the first user.
             const primaryUser = workflowUsers.length > 0 ? workflowUsers[0] : null
 
             const payload = {
@@ -385,27 +442,29 @@ export function WorkflowConfigureContent({
                 enforce_signature_order: enforceOrder
             }
 
-            console.log("Creating workflow response with payload:", payload)
+            console.log("Creating workflow response with payload:")
+            console.log(JSON.stringify(payload, null, 2))
 
             await createWorkflowResponseAPI({
-                workflowId,
+                workflowId: workflowId as string,
                 payload
             })
 
             toast.dismiss()
             toast.success('Workflow response created successfully!')
 
-            // Navigate or update UI?
-            // "succesfully continue butttons turns to send workflow"
-            // Maybe we navigate to invalid route to force a refresh or just update state?
-            // Or maybe we navigate to the response view?
-            // For now, let's keep it on same page or go back to list
+            // Navigate back to workflows list
             navigate({ to: '/workflows', search: { user_id: localStorage.getItem('user_id') || '' } })
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to create workflow response:", error)
+            console.error("Error response:", error?.response?.data)
             toast.dismiss()
-            toast.error('Failed to create workflow response')
+
+            const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create workflow response'
+            toast.error(errorMessage)
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -458,8 +517,18 @@ export function WorkflowConfigureContent({
                     <Button
                         className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20"
                         onClick={handleContinue}
+                        disabled={!isInitialized || isSubmitting || groupedRecipients.length === 0}
                     >
-                        Continue <ChevronRight className="ml-2 h-4 w-4" />
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processing...
+                            </>
+                        ) : (
+                            <>
+                                Continue <ChevronRight className="ml-2 h-4 w-4" />
+                            </>
+                        )}
                     </Button>
                 }
             />
@@ -520,31 +589,38 @@ export function WorkflowConfigureContent({
                             Recipient Details
                         </h3>
 
-                        <div className="grid gap-1">
-                            {groupedRecipients.map((recipient: any, idx: number) => (
-                                <RecipientRow
-                                    key={idx}
-                                    recipientIndex={idx}
-                                    recipient={recipient}
-                                    template={{
-                                        template_id: {
-                                            title: recipient._involvedTemplates
-                                        }
-                                    }}
-                                    contacts={contacts}
-                                    isLoadingContacts={contactsLoading}
-                                    onUpdate={(field, value) => handleUpdateRecipient(recipient.role, field, value)}
-                                />
-                            ))}
+                        {!isInitialized ? (
+                            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
+                                <Loader2 className="h-10 w-10 text-indigo-600 mx-auto mb-3 animate-spin" />
+                                <p className="text-muted-foreground font-medium">Loading recipients...</p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-1">
+                                {groupedRecipients.map((recipient: any, idx: number) => (
+                                    <RecipientRow
+                                        key={idx}
+                                        recipientIndex={idx}
+                                        recipient={recipient}
+                                        template={{
+                                            template_id: {
+                                                title: recipient._involvedTemplates
+                                            }
+                                        }}
+                                        contacts={contacts}
+                                        isLoadingContacts={contactsLoading}
+                                        onUpdate={(field, value) => handleUpdateRecipient(recipient.role, field, value)}
+                                    />
+                                ))}
 
-                            {groupedRecipients.length === 0 && (
-                                <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
-                                    <Users className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                                    <p className="text-muted-foreground font-medium">No recipients found</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Add recipients to the workflow templates to see them here.</p>
-                                </div>
-                            )}
-                        </div>
+                                {groupedRecipients.length === 0 && (
+                                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
+                                        <Users className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+                                        <p className="text-muted-foreground font-medium">No recipients found</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Add recipients to the workflow templates to see them here.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
