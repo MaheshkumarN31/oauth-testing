@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getWorkflowsAPI, createWorkflowAPI } from '@/services/api'
+import { getWorkflowsAPI, createWorkflowAPI, getWorkflowByIdAPI } from '@/services/api'
 import { toast } from 'sonner'
 
 export const WORKFLOWS_QUERY_KEY = 'workflows'
@@ -36,5 +36,16 @@ export function useCreateWorkflow() {
     onError: (error: any) => {
       toast.error(error?.message || 'Failed to create workflow')
     },
+  })
+}
+
+export function useWorkflow(workflowId: string, enabled = true) {
+  return useQuery({
+    queryKey: [WORKFLOWS_QUERY_KEY, workflowId],
+    queryFn: async () => {
+      const response = await getWorkflowByIdAPI(workflowId)
+      return response.data
+    },
+    enabled: enabled && !!workflowId,
   })
 }

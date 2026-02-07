@@ -25,6 +25,7 @@ import { Route as WorkflowsCreateRouteImport } from './routes/workflows_.create'
 import { Route as TemplatesAddRecipientsRouteImport } from './routes/templates_.add-recipients'
 import { Route as DocumentsSendRouteImport } from './routes/documents_.send'
 import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/documents_.create-from-template'
+import { Route as WorkflowsWorkflowIdConfigureRouteImport } from './routes/workflows_.$workflowId.configure'
 
 const WorkspacesRoute = WorkspacesRouteImport.update({
   id: '/workspaces',
@@ -107,6 +108,12 @@ const DocumentsCreateFromTemplateRoute =
     path: '/documents/create-from-template',
     getParentRoute: () => rootRouteImport,
   } as any)
+const WorkflowsWorkflowIdConfigureRoute =
+  WorkflowsWorkflowIdConfigureRouteImport.update({
+    id: '/workflows_/$workflowId/configure',
+    path: '/workflows/$workflowId/configure',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
   '/workflows/create': typeof WorkflowsCreateRoute
+  '/workflows/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -143,6 +151,7 @@ export interface FileRoutesByTo {
   '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
   '/workflows/create': typeof WorkflowsCreateRoute
+  '/workflows/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -162,6 +171,7 @@ export interface FileRoutesById {
   '/documents_/send': typeof DocumentsSendRoute
   '/templates_/add-recipients': typeof TemplatesAddRecipientsRoute
   '/workflows_/create': typeof WorkflowsCreateRoute
+  '/workflows_/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/documents/send'
     | '/templates/add-recipients'
     | '/workflows/create'
+    | '/workflows/$workflowId/configure'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/documents/send'
     | '/templates/add-recipients'
     | '/workflows/create'
+    | '/workflows/$workflowId/configure'
   id:
     | '__root__'
     | '/'
@@ -218,6 +230,7 @@ export interface FileRouteTypes {
     | '/documents_/send'
     | '/templates_/add-recipients'
     | '/workflows_/create'
+    | '/workflows_/$workflowId/configure'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -237,6 +250,7 @@ export interface RootRouteChildren {
   DocumentsSendRoute: typeof DocumentsSendRoute
   TemplatesAddRecipientsRoute: typeof TemplatesAddRecipientsRoute
   WorkflowsCreateRoute: typeof WorkflowsCreateRoute
+  WorkflowsWorkflowIdConfigureRoute: typeof WorkflowsWorkflowIdConfigureRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -353,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocumentsCreateFromTemplateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workflows_/$workflowId/configure': {
+      id: '/workflows_/$workflowId/configure'
+      path: '/workflows/$workflowId/configure'
+      fullPath: '/workflows/$workflowId/configure'
+      preLoaderRoute: typeof WorkflowsWorkflowIdConfigureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -373,6 +394,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocumentsSendRoute: DocumentsSendRoute,
   TemplatesAddRecipientsRoute: TemplatesAddRecipientsRoute,
   WorkflowsCreateRoute: WorkflowsCreateRoute,
+  WorkflowsWorkflowIdConfigureRoute: WorkflowsWorkflowIdConfigureRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

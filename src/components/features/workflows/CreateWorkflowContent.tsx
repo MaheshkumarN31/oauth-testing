@@ -273,8 +273,23 @@ export function CreateWorkflowContent({
         })),
       },
       {
-        onSuccess: () => {
-          navigate({ to: '/workflows', search: { user_id: userId } })
+        onSuccess: (data) => {
+          // The API returns the created workflow data.
+          // Try multiple paths to find the ID: data.data._id (if direct), data.data.data._id (if wrapped in success response)
+          const responseData = data.data || {}
+          const createdWorkflow = responseData.data || responseData
+          const newWorkflowId = createdWorkflow._id || createdWorkflow.id
+
+          if (newWorkflowId) {
+            navigate({
+              to: '/workflows/$workflowId/configure',
+              params: { workflowId: newWorkflowId },
+              search: { user_id: userId }
+            })
+          } else {
+            // Fallback if ID is missing (shouldn't happen)
+            navigate({ to: '/workflows', search: { user_id: userId } })
+          }
         },
       },
     )

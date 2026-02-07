@@ -10,6 +10,7 @@ interface PageHeaderProps {
   title: string
   icon?: LucideIcon
   badge?: string
+  description?: string
   searchPlaceholder?: string
   searchValue?: string
   onSearchChange?: (value: string) => void
@@ -21,6 +22,7 @@ export function PageHeader({
   title,
   icon: Icon,
   badge,
+  description,
   searchPlaceholder = 'Search...',
   searchValue,
   onSearchChange,
@@ -35,13 +37,18 @@ export function PageHeader({
 
         {prefix}
 
-        <div className="flex items-center gap-2">
-          {Icon && <Icon className="h-5 w-5 text-indigo-500" />}
-          <h1 className="text-lg font-semibold">{title}</h1>
-          {badge && (
-            <Badge variant="secondary" className="text-xs">
-              {badge}
-            </Badge>
+        <div className="flex flex-col justify-center">
+          <div className="flex items-center gap-2">
+            {Icon && <Icon className="h-5 w-5 text-indigo-500" />}
+            <h1 className="text-lg font-semibold">{title}</h1>
+            {badge && (
+              <Badge variant="secondary" className="text-xs">
+                {badge}
+              </Badge>
+            )}
+          </div>
+          {description && (
+            <p className="text-xs text-muted-foreground ml-7">{description}</p>
           )}
         </div>
       </div>
