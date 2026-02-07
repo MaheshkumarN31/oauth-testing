@@ -2,15 +2,22 @@ import { useState } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import {
   ArrowLeft,
+  ChevronDown,
+  ChevronUp,
   FileText,
   GitBranch,
   Loader2,
   Search,
+  Settings,
+  Trash2,
   X,
   Zap,
+  Eye,
+  Pencil,
 } from 'lucide-react'
 import { PageHeader } from '@/components/common'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -22,6 +29,10 @@ interface CreateWorkflowContentProps {
   selectedWorkspace: Workspace | null
 }
 
+function getTemplateId(template: Template): string {
+  return template.id || template._id || ''
+}
+
 function formatDate(dateStr?: string) {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -31,40 +42,49 @@ function formatDate(dateStr?: string) {
   })
 }
 
+/* ─── Sidebar template item ─── */
 function TemplateSidebarItem({
   template,
-  isSelected,
+  isDisabled,
   onClick,
 }: {
   template: Template
-  isSelected: boolean
+  isDisabled: boolean
   onClick: () => void
 }) {
   return (
     <button
       onClick={onClick}
+      disabled={isDisabled}
       className={cn(
-        'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b border-border/30 hover:bg-indigo-50/50',
-        isSelected && 'bg-indigo-50 border-l-2 border-l-indigo-500',
+        'w-full flex items-center gap-3 px-4 py-3 text-left transition-all border-b border-border/30',
+        isDisabled
+          ? 'opacity-40 cursor-not-allowed bg-muted/40'
+          : 'hover:bg-indigo-50/60 cursor-pointer',
       )}
     >
       <div
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-lg shrink-0',
-          isSelected
-            ? 'bg-indigo-500 text-white'
-            : 'bg-amber-100 text-amber-600',
+          isDisabled ? 'bg-gray-200 text-gray-400' : 'bg-amber-100 text-amber-600',
         )}
       >
         <FileText className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium truncate">{template.name}</p>
+        <p className={cn('text-sm font-medium truncate', isDisabled && 'text-muted-foreground')}>
+          {template.name}
+        </p>
         <p className="text-xs text-muted-foreground truncate">
           {template.created_by_name ? `@${template.created_by_name}` : ''}
           {template.created_at ? ` ${formatDate(template.created_at)}` : ''}
         </p>
       </div>
+      {isDisabled && (
+        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 shrink-0">
+          Added
+        </Badge>
+      )}
     </button>
   )
 }
@@ -81,25 +101,120 @@ function TemplateSidebarSkeleton() {
   )
 }
 
+/* ─── Step card on the canvas ─── */
+function StepCard({
+  step,
+  index,
+  totalSteps,
+  onRemove,
+  onMoveUp,
+  onMoveDown,
+}: {
+  step: Template
+  index: number
+  totalSteps: number
+  onRemove: () => void
+  onMoveUp: () => void
+  onMoveDown: () => void
+}) {
+  return (
+    <div className="w-full max-w-2xl">
+      {/* Step header */}
+      <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-slate-50 to-white border border-border/60 rounded-t-xl">
+        <div className="flex items-center gap-2">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 shrink-0">
+            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+          </span>
+          <span className="text-sm font-semibold text-foreground">Step {index + 1}</span>
+          <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 text-[10px] px-2 py-0 h-5 font-medium hover:bg-indigo-100">
+            SIGNER
+          </Badge>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50"
+          onClick={onRemove}
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      {/* Step body */}
+      <div className="flex items-center gap-3 px-4 py-3 bg-white border-x border-b border-border/60 rounded-b-xl shadow-sm">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 shrink-0">
+          <FileText className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium truncate">{step.name}</p>
+          <p className="text-xs text-muted-foreground">{formatDate(step.created_at)}</p>
+        </div>
+
+        {/* Move buttons */}
+        <div className="flex flex-col gap-0.5">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-6 w-6"
+            disabled={index === 0}
+            onClick={onMoveUp}
+          >
+            <ChevronUp className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-6 w-6"
+            disabled={index === totalSteps - 1}
+            onClick={onMoveDown}
+          >
+            <ChevronDown className="h-3 w-3" />
+          </Button>
+        </div>
+
+        {/* Actions */}
+        <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+          <Eye className="h-3 w-3" />
+          Preview
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+          <Settings className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Next step placeholder ─── */
+function NextStepPlaceholder({ stepNumber }: { stepNumber: number }) {
+  return (
+    <div className="w-full max-w-2xl border-2 border-dashed border-border/40 rounded-xl px-4 py-4 text-center">
+      <p className="text-sm text-muted-foreground">Step {stepNumber}</p>
+    </div>
+  )
+}
+
+/* ─── Main component ─── */
 export function CreateWorkflowContent({
   selectedWorkspace,
 }: CreateWorkflowContentProps) {
   const search = useSearch({ strict: false }) as { user_id?: string; workflow_name?: string }
   const workflowName = search.workflow_name || ''
 
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [selectedTemplates, setSelectedTemplates] = useState<Template[]>([])
   const [templateSearch, setTemplateSearch] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const navigate = useNavigate()
   const userId = localStorage.getItem('user_id') || ''
-  const companyId =
-    localStorage.getItem('company_id') || selectedWorkspace?._id || ''
+  const companyId = selectedWorkspace?._id
 
   const { data: templatesData, isLoading: templatesLoading } = useTemplates({
     companyId,
     page: 0,
     pageSize: 100,
-    enabled: !!companyId,
   })
 
   const { mutate: createWorkflow, isPending: isCreating } = useCreateWorkflow()
@@ -109,14 +224,49 @@ export function CreateWorkflowContent({
     t.name?.toLowerCase().includes(templateSearch.toLowerCase()),
   )
 
-  const handleCreate = () => {
-    if (!workflowName.trim() || !selectedTemplate) return
+  // Set of selected template IDs for O(1) lookups
+  const selectedIds = new Set(selectedTemplates.map(getTemplateId))
+
+  const handleAddTemplate = (template: Template) => {
+    if (selectedIds.has(getTemplateId(template))) return
+    setSelectedTemplates((prev) => [...prev, template])
+  }
+
+  const handleRemoveTemplate = (index: number) => {
+    setSelectedTemplates((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return
+    setSelectedTemplates((prev) => {
+      const next = [...prev]
+      ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
+      return next
+    })
+  }
+
+  const handleMoveDown = (index: number) => {
+    if (index >= selectedTemplates.length - 1) return
+    setSelectedTemplates((prev) => {
+      const next = [...prev]
+      ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
+      return next
+    })
+  }
+
+  const handleSave = () => {
+    if (!workflowName.trim() || selectedTemplates.length === 0 || !companyId) return
 
     createWorkflow(
       {
         name: workflowName.trim(),
         company_id: companyId,
-        template_id: selectedTemplate.id || selectedTemplate._id,
+        template_id: selectedTemplates.map(getTemplateId).join(','),
+        steps: selectedTemplates.map((t, i) => ({
+          step: i + 1,
+          template_id: getTemplateId(t),
+          template_name: t.name,
+        })),
       },
       {
         onSuccess: () => {
@@ -146,8 +296,8 @@ export function CreateWorkflowContent({
         }
         actions={
           <Button
-            onClick={handleCreate}
-            disabled={!selectedTemplate || isCreating}
+            onClick={handleSave}
+            disabled={selectedTemplates.length === 0 || isCreating}
             className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
             size="sm"
           >
@@ -162,54 +312,80 @@ export function CreateWorkflowContent({
       />
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Main canvas area */}
-        <div className="flex-1 flex flex-col items-center justify-center bg-muted/20 relative">
-          {selectedTemplate ? (
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
-                <FileText className="h-10 w-10 text-indigo-500/60" />
+        {/* ─── Main canvas ─── */}
+        <div className="flex-1 overflow-auto bg-slate-50/80 relative">
+          <div className="flex flex-col items-center py-10 px-4 min-h-full gap-5">
+            {/* START label */}
+            <p className="text-xs font-bold tracking-widest text-indigo-500 uppercase">
+              Start
+            </p>
+
+            {/* Connector */}
+            {selectedTemplates.length > 0 && (
+              <div className="w-px h-6 bg-border" />
+            )}
+
+            {/* Step cards */}
+            {selectedTemplates.map((template, index) => (
+              <div key={`${getTemplateId(template)}-${index}`} className="contents">
+                <StepCard
+                  step={template}
+                  index={index}
+                  totalSteps={selectedTemplates.length}
+                  onRemove={() => handleRemoveTemplate(index)}
+                  onMoveUp={() => handleMoveUp(index)}
+                  onMoveDown={() => handleMoveDown(index)}
+                />
+                {/* Connector line between steps */}
+                <div className="w-px h-5 bg-border relative">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-indigo-300" />
+                </div>
               </div>
-              <div className="text-center max-w-md">
-                <h3 className="text-lg font-semibold mb-1">
-                  {selectedTemplate.name}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Template selected for workflow "{workflowName}"
+            ))}
+
+            {/* Next step placeholder */}
+            <NextStepPlaceholder stepNumber={selectedTemplates.length + 1} />
+
+            {/* END label */}
+            <div className="w-px h-5 bg-border" />
+            <p className="text-xs font-bold tracking-widest text-red-400 uppercase">
+              End
+            </p>
+
+            {/* Empty state message (only when no templates selected) */}
+            {selectedTemplates.length === 0 && (
+              <div className="flex flex-col items-center gap-3 mt-6 max-w-sm text-center">
+                <div className="relative">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-purple-100">
+                    <GitBranch className="h-10 w-10 text-indigo-400" />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500 text-white shadow-lg">
+                    <FileText className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Pick a template or document from the right bar to start
+                  building your workflow!
                 </p>
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-4 max-w-md text-center px-4">
-              <div className="relative">
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-purple-100">
-                  <GitBranch className="h-12 w-12 text-indigo-400" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-lg">
-                  <FileText className="h-4 w-4" />
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Pick a template or document from the right bar and drag it to
-                start building your workflow!
-              </p>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Toggle sidebar button when closed */}
           {!sidebarOpen && (
             <Button
               variant="outline"
               size="sm"
-              className="absolute top-4 right-4"
+              className="absolute top-4 right-4 shadow-sm"
               onClick={() => setSidebarOpen(true)}
             >
               <FileText className="mr-2 h-4 w-4" />
-              Show Templates
+              Templates
             </Button>
           )}
         </div>
 
-        {/* Right sidebar - Document Templates */}
+        {/* ─── Right sidebar ─── */}
         {sidebarOpen && (
           <div className="w-[320px] flex flex-col border-l border-border/50 bg-background shrink-0">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
@@ -245,7 +421,7 @@ export function CreateWorkflowContent({
                     <TemplateSidebarSkeleton key={i} />
                   ))}
                 </div>
-              ) : filteredTemplates.length === 0 ? (
+              ) : templates.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4">
                   <FileText className="h-8 w-8 text-muted-foreground/30 mb-3" />
                   <p className="text-xs text-muted-foreground text-center">
@@ -256,17 +432,18 @@ export function CreateWorkflowContent({
                 </div>
               ) : (
                 <div>
-                  {filteredTemplates.map((template) => (
-                    <TemplateSidebarItem
-                      key={template.id || template._id}
-                      template={template}
-                      isSelected={
-                        (selectedTemplate?.id || selectedTemplate?._id) ===
-                        (template.id || template._id)
-                      }
-                      onClick={() => setSelectedTemplate(template)}
-                    />
-                  ))}
+                  {templates.map((template) => {
+                    const tid = getTemplateId(template)
+                    const isDisabled = selectedIds.has(tid)
+                    return (
+                      <TemplateSidebarItem
+                        key={tid}
+                        template={template}
+                        isDisabled={isDisabled}
+                        onClick={() => handleAddTemplate(template)}
+                      />
+                    )
+                  })}
                 </div>
               )}
             </ScrollArea>

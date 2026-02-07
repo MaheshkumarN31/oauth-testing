@@ -274,7 +274,7 @@ export function WorkflowsContent({ selectedWorkspace }: WorkflowsContentProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const navigate = useNavigate()
   const userId = localStorage.getItem('user_id') || ''
-  const companyId = localStorage.getItem('company_id') || selectedWorkspace?._id || ''
+  const companyId = selectedWorkspace?._id || ''
 
   const { data: workflowsData, isLoading } = useWorkflows({
     companyId,
