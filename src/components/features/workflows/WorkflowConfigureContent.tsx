@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useWorkflow, useContacts } from '@/hooks/queries'
 import { getTemplateByIdAPI } from '@/services/api/templates'
+import { createWorkflowResponseAPI } from '@/services/api/workflows'
 import type { Workspace } from '@/types'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -301,10 +302,111 @@ export function WorkflowConfigureContent({
 
     const contacts = Array.isArray(contactsData) ? contactsData : []
 
-    const handleContinue = () => {
-        // Logic to save/update and proceed
-        toast.info('Saving configuration...')
-        // navigate to next step
+    const handleContinue = async () => {
+        // Validate recipients
+        const incompleteRecipients = groupedRecipients.filter(r => {
+            const isSender = (r.role || r.contact_type || '').toLowerCase() === 'sender'
+            // Skip validation for sender as they are current user
+            if (isSender) return false
+
+            return !r.email || !r.selected_contact_id
+        })
+
+        if (incompleteRecipients.length > 0) {
+            toast.error(`Please select a contact for: ${incompleteRecipients.map(r => r.role).join(', ')}`)
+            return
+        }
+
+        console.log("Validation passed. Creating workflow response...", { recipients, groupedRecipients })
+
+        try {
+            toast.loading('Creating workflow response...')
+
+            // Construct workflow_users payload
+            // We need to group back by unique user (email/contact_id) and aggregate templates
+            const usersMap = new Map<string, any>()
+
+            // Iterate through ALL flattened recipients to build the user list with templates
+            recipients.forEach(r => {
+                // Key by role since we grouped by role in the UI and allow selecting one contact per role
+                // Wait, if the user modifies a grouped recipient in the UI, we update 'recipients' state?
+                // The 'handleUpdateRecipient' updates 'recipients' state.
+                // But the 'groupedRecipients' is derived.
+                // If I update 'recipients' based on role matches, all recipients with that role get updated.
+                // So all instances of "Signer" get the same email/contact_id.
+                // This is correct behavior for "Role-based" assignment.
+
+                const key = r.role || r.contact_type
+                if (!usersMap.has(key)) {
+                    usersMap.set(key, {
+                        ...r, // contains contact info (email, id, etc)
+                        templates: []
+                    })
+                }
+
+                const userObj = usersMap.get(key)
+                userObj.templates.push({
+                    user_type: r.user_type || 'SIGNER', // Default to SIGNER?
+                    template_id: r._templateId,
+                    template_name: r._templateName
+                })
+            })
+
+            const workflowUsers = Array.from(usersMap.values()).map(u => ({
+                e_signature_required: u.e_signature_required ?? false, // Default false or from user data?
+                value: u.value || u.role || `RECEIVER_${Math.random()}`, // value seems to be an ID or code? The payload has RECEIVER_1
+                name: u.name || "",
+                email: u.email,
+                first_name: u.first_name,
+                last_name: u.last_name,
+                type: u.type || 'RECEIVER',
+                user_type: u.user_type || 'SIGNER',
+                contact_type: u.contact_type, // Maintain the original contact_type ID/String
+                role: u.role,
+                templates: u.templates,
+                user_types: u.user_types || [],
+                errors: {},
+                contact_id: u.selected_contact_id || u.contact_id || u._id || u.id, // Ensure we send contact_id
+                phone: u.phone,
+                address: u.address,
+                title: u.title,
+                company_name: u.company_name,
+                full_name: `${u.first_name || ''} ${u.last_name || ''}`.trim()
+            }))
+
+            // Identify primary user - For now take the first one?
+            // User payload example shows primary_user is same as the first user.
+            const primaryUser = workflowUsers.length > 0 ? workflowUsers[0] : null
+
+            const payload = {
+                company_id: companyId,
+                workflow_users: workflowUsers,
+                primary_user: primaryUser,
+                enforce_signature_order: enforceOrder
+            }
+
+            console.log("Creating workflow response with payload:", payload)
+
+            await createWorkflowResponseAPI({
+                workflowId,
+                payload
+            })
+
+            toast.dismiss()
+            toast.success('Workflow response created successfully!')
+
+            // Navigate or update UI?
+            // "succesfully continue butttons turns to send workflow"
+            // Maybe we navigate to invalid route to force a refresh or just update state?
+            // Or maybe we navigate to the response view?
+            // For now, let's keep it on same page or go back to list
+            navigate({ to: '/workflows', search: { user_id: localStorage.getItem('user_id') || '' } })
+
+        } catch (error) {
+            console.error("Failed to create workflow response:", error)
+            toast.dismiss()
+            toast.error('Failed to create workflow response')
+        }
     }
 
     if (workflowLoading) {
