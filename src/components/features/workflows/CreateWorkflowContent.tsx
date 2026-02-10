@@ -271,6 +271,12 @@ export function CreateWorkflowContent({
           template_id: getTemplateId(t),
           template_name: t.title || t.name,
         })),
+        document_templates: selectedTemplates.map((t, i) => ({
+          template_id: getTemplateId(t),
+          document_order: i,
+          template_completion_status: 'TO-START',
+          is_settings_updated: false,
+        })),
       },
       {
         onSuccess: (data) => {

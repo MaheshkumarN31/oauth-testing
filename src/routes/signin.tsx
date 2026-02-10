@@ -41,11 +41,6 @@ function SignIn() {
           Sign in to manage your documents securely
         </p>
 
-        {isError && (
-          <div className="mb-6 p-3 rounded-lg bg-red-50 border border-red-200">
-            <p className="text-red-600 text-sm">❌ Failed to get auth URL</p>
-          </div>
-        )}
 
         <button
           onClick={() => refetch()}

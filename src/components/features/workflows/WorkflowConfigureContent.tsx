@@ -367,106 +367,131 @@ export function WorkflowConfigureContent({
 
     const contacts = Array.isArray(contactsData) ? contactsData : []
 
-    const handleContinue = async () => {
-        // Check if initialized
-        if (!isInitialized) {
-            toast.error('Please wait, still loading templates...')
-            return
+const handleContinue = async () => {
+    // Check if initialized
+    if (!isInitialized) {
+        toast.error('Please wait, still loading templates...')
+        return
+    }
+
+    // Validate recipients
+    const incompleteRecipients = groupedRecipients.filter(r => {
+        const isSender = (r.contact_type_name || r.role || '').toLowerCase() === 'sender'
+        if (isSender) return false
+        return !r.email || !r.selected_contact_id
+    })
+
+    if (incompleteRecipients.length > 0) {
+        toast.error(`Please select a contact for: ${incompleteRecipients.map(r => r.role).join(', ')}`)
+        return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+        toast.loading('Creating workflow response...')
+
+        // Build document_templates array from workflow data
+        // Use document_templates if available, otherwise fall back to steps (same as initialization)
+        let rawTemplates = workflowData?.document_templates || []
+        if (rawTemplates.length === 0 && workflowData?.steps) {
+            rawTemplates = workflowData.steps
         }
 
-        // Validate recipients
-        const incompleteRecipients = groupedRecipients.filter(r => {
-            const isSender = (r.contact_type_name || r.role || '').toLowerCase() === 'sender'
-            if (isSender) return false
-            return !r.email || !r.selected_contact_id
+        const documentTemplates = rawTemplates
+            .filter((tmpl: any) => {
+                // Filter active templates
+                if (tmpl.is_active === false) return false
+                if (tmpl.status && tmpl.status !== 'ACTIVE' && tmpl.status !== 'active') return false
+                if (tmpl.template_id?.status && tmpl.template_id.status !== 'ACTIVE' && tmpl.template_id.status !== 'active') return false
+                return true
+            })
+            .map((tmpl: any) => ({
+                template_id: tmpl.template_id?._id || tmpl.template_id || tmpl._id || tmpl.id,
+                template_response_id: tmpl.template_response_id,
+                document_order: tmpl.document_order ?? 0,
+                template_completion_status: tmpl.template_completion_status || "TO-START",
+                is_settings_updated: tmpl.is_settings_updated ?? false
+            }))
+
+        // Build workflow_users from groupedRecipients, filtering out senders
+        const workflowUsers = groupedRecipients
+            .filter(r => {
+                const roleName = (r.contact_type_name || r.role || '').toLowerCase()
+                return roleName !== 'sender'
+            })
+            .map((u, index) => {
+                // Filter templates to only include ones with valid template_id
+                const validTemplates = (u.templates || []).filter(
+                    (t: any) => t.template_id != null
+                )
+
+                return {
+                    e_signature_required: u.e_signature_required ?? false,
+                    value: u.value || `RECEIVER_${index + 1}`,
+                    name: u.name || "",
+                    email: u.email,
+                    first_name: u.first_name,
+                    last_name: u.last_name,
+                    type: u.type || 'RECEIVER',
+                    user_type: u.user_type || 'SIGNER',
+                    contact_type: u.contact_type,
+                    role: u.contact_type_name || u.role,
+                    templates: validTemplates,
+                    user_types: u.user_types || [],
+                    errors: {},
+                    contact_id: u.selected_contact_id || u.contact_id,
+                    phone: u.phone || '',
+                    address: u.address || '',
+                    title: u.title || '',
+                    company_name: u.company_name || '',
+                    full_name: `${u.first_name || ''} ${u.last_name || ''}`.trim()
+                }
+            })
+            // Filter out users that have no valid templates
+            .filter(u => u.templates.length > 0)
+
+        console.log("Document templates:", documentTemplates)
+        console.log("Workflow users with templates:")
+        workflowUsers.forEach(user => {
+            console.log(`- ${user.role}: ${user.templates.length} templates`, user.templates)
         })
 
-        if (incompleteRecipients.length > 0) {
-            toast.error(`Please select a contact for: ${incompleteRecipients.map(r => r.role).join(', ')}`)
-            return
+        const primaryUser = workflowUsers.length > 0 ? workflowUsers[0] : null
+
+        const payload = {
+            company_id: companyId,
+            document_templates: documentTemplates,
+            workflow_users: workflowUsers,
+            primary_user: primaryUser,
+            enforce_signature_order: enforceOrder
         }
 
-        setIsSubmitting(true)
+        console.log("Creating workflow response with payload:")
+        console.log(JSON.stringify(payload, null, 2))
 
-        try {
-            toast.loading('Creating workflow response...')
+        await createWorkflowResponseAPI({
+            workflowId: workflowId as string,
+            payload
+        })
 
-            // Build workflow_users from groupedRecipients, filtering out senders
-            const workflowUsers = groupedRecipients
-                .filter(r => {
-                    const roleName = (r.contact_type_name || r.role || '').toLowerCase()
-                    return roleName !== 'sender'
-                })
-                .map((u, index) => {
-                    // Filter templates to only include ones with valid template_id
-                    const validTemplates = (u.templates || []).filter(
-                        (t: any) => t.template_id != null
-                    )
+        toast.dismiss()
+        toast.success('Workflow response created successfully!')
 
-                    return {
-                        e_signature_required: u.e_signature_required ?? false,
-                        value: u.value || `RECEIVER_${index + 1}`,
-                        name: u.name || "",
-                        email: u.email,
-                        first_name: u.first_name,
-                        last_name: u.last_name,
-                        type: u.type || 'RECEIVER',
-                        user_type: u.user_type || 'SIGNER',
-                        contact_type: u.contact_type,
-                        role: u.contact_type_name || u.role,
-                        templates: validTemplates,
-                        user_types: u.user_types || [],
-                        errors: {},
-                        contact_id: u.selected_contact_id || u.contact_id,
-                        phone: u.phone || '',
-                        address: u.address || '',
-                        title: u.title || '',
-                        company_name: u.company_name || '',
-                        full_name: `${u.first_name || ''} ${u.last_name || ''}`.trim()
-                    }
-                })
-                // Filter out users that have no valid templates
-                .filter(u => u.templates.length > 0)
+        // Navigate back to workflows list
+        navigate({ to: '/workflows', search: { user_id: localStorage.getItem('user_id') || '' } })
 
-            console.log("Workflow users with templates:")
-            workflowUsers.forEach(user => {
-                console.log(`- ${user.role}: ${user.templates.length} templates`, user.templates)
-            })
+    } catch (error: any) {
+        console.error("Failed to create workflow response:", error)
+        console.error("Error response:", error?.response?.data)
+        toast.dismiss()
 
-            const primaryUser = workflowUsers.length > 0 ? workflowUsers[0] : null
-
-            const payload = {
-                company_id: companyId,
-                workflow_users: workflowUsers,
-                primary_user: primaryUser,
-                enforce_signature_order: enforceOrder
-            }
-
-            console.log("Creating workflow response with payload:")
-            console.log(JSON.stringify(payload, null, 2))
-
-            await createWorkflowResponseAPI({
-                workflowId: workflowId as string,
-                payload
-            })
-
-            toast.dismiss()
-            toast.success('Workflow response created successfully!')
-
-            // Navigate back to workflows list
-            navigate({ to: '/workflows', search: { user_id: localStorage.getItem('user_id') || '' } })
-
-        } catch (error: any) {
-            console.error("Failed to create workflow response:", error)
-            console.error("Error response:", error?.response?.data)
-            toast.dismiss()
-
-            const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create workflow response'
-            toast.error(errorMessage)
-        } finally {
-            setIsSubmitting(false)
-        }
+        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create workflow response'
+        toast.error(errorMessage)
+    } finally {
+        setIsSubmitting(false)
     }
+}
 
     if (workflowLoading) {
         return (
