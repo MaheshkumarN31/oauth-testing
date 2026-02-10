@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { ArrowLeft, CheckCircle2, Mail, Send, User } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Workspace } from '@/types'
 import { sendDocumentAPI } from '@/services/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,9 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 
-interface SendDocumentScreenProps {
-    selectedWorkspace: Workspace | null
-}
+
 
 // Helper to get user from localStorage
 const getUserFromLocalStorage = () => {
@@ -24,7 +21,7 @@ const getUserFromLocalStorage = () => {
     }
 }
 
-export function SendDocumentScreen({ selectedWorkspace }: SendDocumentScreenProps) {
+export function SendDocumentScreen() {
     const searchParams = new URLSearchParams(window.location.search)
     const templateId = searchParams.get('template_id') || ''
     const responseId = searchParams.get('response_id') || ''

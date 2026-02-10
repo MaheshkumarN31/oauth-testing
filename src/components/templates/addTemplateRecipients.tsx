@@ -56,7 +56,7 @@ const AddTemplateRecipients = () => {
 
   const { data: contactTypes } = useQuery({
     queryKey: ['contact-types', selectedWorkspace?._id],
-    queryFn: () => getContactTypesAPI({ company_id: selectedWorkspace?._id || '' }),
+queryFn: () => getContactTypesAPI(selectedWorkspace?._id || ''),
     enabled: !!selectedWorkspace?._id
   })
 
