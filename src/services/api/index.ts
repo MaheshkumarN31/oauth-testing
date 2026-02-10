@@ -16,8 +16,19 @@ export * from './documents'
 
 // Template APIs
 export * from "./templates";
-export * from "./auth";
 export * from "./contact-types";
 
-export * from './contacts'
+// Contacts APIs (exclude ContactType to avoid ambiguity with contact-types)
+export {
+    type ContactTypeAssignment,
+    type ContactCreatedBy,
+    type Contact,
+    type GetContactsResponse,
+    type CreateContactPayload,
+    type UpdateContactPayload,
+    getContactsAPI,
+    createContactAPI,
+    updateContactAPI,
+    deleteContactAPI,
+} from './contacts'
 export * from './workflows'

@@ -18,7 +18,7 @@ export function useContactTypes(companyId: string) {
             console.log('DEBUG: Contact Types Response:', response)
             // Handle various response structures
             // Case 1: response.data.data (standard)
-            if (Array.isArray(response?.data?.data)) return response.data.data
+            // if (Array.isArray(response?.data?.data)) return response.data.data
             // Case 2: response.data (direct array)
             if (Array.isArray(response?.data)) return response.data
             // Case 3: response (direct array)
