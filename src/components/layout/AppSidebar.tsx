@@ -1,18 +1,23 @@
 import {
   BarChart3,
+  Briefcase,
   Building2,
   Check,
   ChevronUp,
   FolderOpen,
+  GitBranch,
   LayoutDashboard,
   LogOut,
   Plus,
   Settings,
+  Tag,
   Users,
+  Shield,
+  UserCog,
 } from 'lucide-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { useState } from 'react'
-import type { Workspace } from '@/components/dashboard'
+import type { Workspace } from '@/types'
 import {
   Sidebar,
   SidebarContent,
@@ -75,7 +80,7 @@ function SidebarLogo({
       className={cn(
         'flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0',
         isCollapsed &&
-          'cursor-pointer hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2 hover:ring-offset-sidebar transition-all',
+        'cursor-pointer hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2 hover:ring-offset-sidebar transition-all',
       )}
     >
       <Building2 className="h-4 w-4 text-white" />
@@ -197,16 +202,41 @@ export function AppSidebar({
       path: '/templates',
     },
     {
-      title: 'Team',
+      title: 'Workflows',
+      icon: GitBranch,
+      href: `/workflows?user_id=${userId}`,
+      path: '/workflows',
+    },
+
+    {
+      title: 'Contacts',
       icon: Users,
-      href: '#',
-      path: '/team',
+      href: `/contacts?user_id=${userId}`,
+      path: '/contacts',
     },
     {
-      title: 'Analytics',
-      icon: BarChart3,
-      href: '#',
-      path: '/analytics',
+      title: 'Contact Types',
+      icon: Tag,
+      href: `/contact-types?user_id=${userId}`,
+      path: '/contact-types',
+    },
+    {
+      title: 'Users',
+      icon: UserCog,
+      href: `/users?user_id=${userId}`,
+      path: '/users',
+    },
+    {
+      title: 'User Types',
+      icon: Shield,
+      href: `/user-types?user_id=${userId}`,
+      path: '/user-types',
+    },
+    {
+      title: 'Workspaces',
+      icon: Briefcase,
+      href: `/workspaces?user_id=${userId}`,
+      path: '/workspaces',
     },
   ]
 
@@ -242,7 +272,7 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
-                const isActive = location.pathname === item.path
+                const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton

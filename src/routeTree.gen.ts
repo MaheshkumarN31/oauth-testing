@@ -9,14 +9,45 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkspacesRouteImport } from './routes/workspaces'
+import { Route as WorkflowsRouteImport } from './routes/workflows'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as UserTypesRouteImport } from './routes/user-types'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ContactsRouteImport } from './routes/contacts'
+import { Route as ContactTypesRouteImport } from './routes/contact-types'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthCheckRouteImport } from './routes/auth-check'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkflowsCreateRouteImport } from './routes/workflows_.create'
 import { Route as TemplatesAddRecipientsRouteImport } from './routes/templates_.add-recipients'
+import { Route as DocumentsSendRouteImport } from './routes/documents_.send'
+import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/documents_.create-from-template'
+import { Route as WorkflowsWorkflowIdSuccessRouteImport } from './routes/workflows_.$workflowId.success'
+import { Route as WorkflowsWorkflowIdConfigureRouteImport } from './routes/workflows_.$workflowId.configure'
 
+const WorkspacesRoute = WorkspacesRouteImport.update({
+  id: '/workspaces',
+  path: '/workspaces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkflowsRoute = WorkflowsRouteImport.update({
+  id: '/workflows',
+  path: '/workflows',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserTypesRoute = UserTypesRouteImport.update({
+  id: '/user-types',
+  path: '/user-types',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
   path: '/templates',
@@ -30,6 +61,16 @@ const SigninRoute = SigninRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactsRoute = ContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactTypesRoute = ContactTypesRouteImport.update({
+  id: '/contact-types',
+  path: '/contact-types',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CallbackRoute = CallbackRouteImport.update({
@@ -47,39 +88,100 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkflowsCreateRoute = WorkflowsCreateRouteImport.update({
+  id: '/workflows_/create',
+  path: '/workflows/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesAddRecipientsRoute = TemplatesAddRecipientsRouteImport.update({
   id: '/templates_/add-recipients',
   path: '/templates/add-recipients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentsSendRoute = DocumentsSendRouteImport.update({
+  id: '/documents_/send',
+  path: '/documents/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsCreateFromTemplateRoute =
+  DocumentsCreateFromTemplateRouteImport.update({
+    id: '/documents_/create-from-template',
+    path: '/documents/create-from-template',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WorkflowsWorkflowIdSuccessRoute =
+  WorkflowsWorkflowIdSuccessRouteImport.update({
+    id: '/workflows_/$workflowId/success',
+    path: '/workflows/$workflowId/success',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WorkflowsWorkflowIdConfigureRoute =
+  WorkflowsWorkflowIdConfigureRouteImport.update({
+    id: '/workflows_/$workflowId/configure',
+    path: '/workflows/$workflowId/configure',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth-check': typeof AuthCheckRoute
   '/callback': typeof CallbackRoute
+  '/contact-types': typeof ContactTypesRoute
+  '/contacts': typeof ContactsRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/user-types': typeof UserTypesRoute
+  '/users': typeof UsersRoute
+  '/workflows': typeof WorkflowsRoute
+  '/workspaces': typeof WorkspacesRoute
+  '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
+  '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
+  '/workflows/create': typeof WorkflowsCreateRoute
+  '/workflows/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
+  '/workflows/$workflowId/success': typeof WorkflowsWorkflowIdSuccessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth-check': typeof AuthCheckRoute
   '/callback': typeof CallbackRoute
+  '/contact-types': typeof ContactTypesRoute
+  '/contacts': typeof ContactsRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/user-types': typeof UserTypesRoute
+  '/users': typeof UsersRoute
+  '/workflows': typeof WorkflowsRoute
+  '/workspaces': typeof WorkspacesRoute
+  '/documents/create-from-template': typeof DocumentsCreateFromTemplateRoute
+  '/documents/send': typeof DocumentsSendRoute
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
+  '/workflows/create': typeof WorkflowsCreateRoute
+  '/workflows/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
+  '/workflows/$workflowId/success': typeof WorkflowsWorkflowIdSuccessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth-check': typeof AuthCheckRoute
   '/callback': typeof CallbackRoute
+  '/contact-types': typeof ContactTypesRoute
+  '/contacts': typeof ContactsRoute
   '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/templates': typeof TemplatesRoute
+  '/user-types': typeof UserTypesRoute
+  '/users': typeof UsersRoute
+  '/workflows': typeof WorkflowsRoute
+  '/workspaces': typeof WorkspacesRoute
+  '/documents_/create-from-template': typeof DocumentsCreateFromTemplateRoute
+  '/documents_/send': typeof DocumentsSendRoute
   '/templates_/add-recipients': typeof TemplatesAddRecipientsRoute
+  '/workflows_/create': typeof WorkflowsCreateRoute
+  '/workflows_/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
+  '/workflows_/$workflowId/success': typeof WorkflowsWorkflowIdSuccessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,42 +189,114 @@ export interface FileRouteTypes {
     | '/'
     | '/auth-check'
     | '/callback'
+    | '/contact-types'
+    | '/contacts'
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/user-types'
+    | '/users'
+    | '/workflows'
+    | '/workspaces'
+    | '/documents/create-from-template'
+    | '/documents/send'
     | '/templates/add-recipients'
+    | '/workflows/create'
+    | '/workflows/$workflowId/configure'
+    | '/workflows/$workflowId/success'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth-check'
     | '/callback'
+    | '/contact-types'
+    | '/contacts'
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/user-types'
+    | '/users'
+    | '/workflows'
+    | '/workspaces'
+    | '/documents/create-from-template'
+    | '/documents/send'
     | '/templates/add-recipients'
+    | '/workflows/create'
+    | '/workflows/$workflowId/configure'
+    | '/workflows/$workflowId/success'
   id:
     | '__root__'
     | '/'
     | '/auth-check'
     | '/callback'
+    | '/contact-types'
+    | '/contacts'
     | '/dashboard'
     | '/signin'
     | '/templates'
+    | '/user-types'
+    | '/users'
+    | '/workflows'
+    | '/workspaces'
+    | '/documents_/create-from-template'
+    | '/documents_/send'
     | '/templates_/add-recipients'
+    | '/workflows_/create'
+    | '/workflows_/$workflowId/configure'
+    | '/workflows_/$workflowId/success'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthCheckRoute: typeof AuthCheckRoute
   CallbackRoute: typeof CallbackRoute
+  ContactTypesRoute: typeof ContactTypesRoute
+  ContactsRoute: typeof ContactsRoute
   DashboardRoute: typeof DashboardRoute
   SigninRoute: typeof SigninRoute
   TemplatesRoute: typeof TemplatesRoute
+  UserTypesRoute: typeof UserTypesRoute
+  UsersRoute: typeof UsersRoute
+  WorkflowsRoute: typeof WorkflowsRoute
+  WorkspacesRoute: typeof WorkspacesRoute
+  DocumentsCreateFromTemplateRoute: typeof DocumentsCreateFromTemplateRoute
+  DocumentsSendRoute: typeof DocumentsSendRoute
   TemplatesAddRecipientsRoute: typeof TemplatesAddRecipientsRoute
+  WorkflowsCreateRoute: typeof WorkflowsCreateRoute
+  WorkflowsWorkflowIdConfigureRoute: typeof WorkflowsWorkflowIdConfigureRoute
+  WorkflowsWorkflowIdSuccessRoute: typeof WorkflowsWorkflowIdSuccessRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workspaces': {
+      id: '/workspaces'
+      path: '/workspaces'
+      fullPath: '/workspaces'
+      preLoaderRoute: typeof WorkspacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workflows': {
+      id: '/workflows'
+      path: '/workflows'
+      fullPath: '/workflows'
+      preLoaderRoute: typeof WorkflowsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user-types': {
+      id: '/user-types'
+      path: '/user-types'
+      fullPath: '/user-types'
+      preLoaderRoute: typeof UserTypesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates': {
       id: '/templates'
       path: '/templates'
@@ -142,6 +316,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contacts': {
+      id: '/contacts'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof ContactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact-types': {
+      id: '/contact-types'
+      path: '/contact-types'
+      fullPath: '/contact-types'
+      preLoaderRoute: typeof ContactTypesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/callback': {
@@ -165,11 +353,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workflows_/create': {
+      id: '/workflows_/create'
+      path: '/workflows/create'
+      fullPath: '/workflows/create'
+      preLoaderRoute: typeof WorkflowsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates_/add-recipients': {
       id: '/templates_/add-recipients'
       path: '/templates/add-recipients'
       fullPath: '/templates/add-recipients'
       preLoaderRoute: typeof TemplatesAddRecipientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents_/send': {
+      id: '/documents_/send'
+      path: '/documents/send'
+      fullPath: '/documents/send'
+      preLoaderRoute: typeof DocumentsSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents_/create-from-template': {
+      id: '/documents_/create-from-template'
+      path: '/documents/create-from-template'
+      fullPath: '/documents/create-from-template'
+      preLoaderRoute: typeof DocumentsCreateFromTemplateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workflows_/$workflowId/success': {
+      id: '/workflows_/$workflowId/success'
+      path: '/workflows/$workflowId/success'
+      fullPath: '/workflows/$workflowId/success'
+      preLoaderRoute: typeof WorkflowsWorkflowIdSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workflows_/$workflowId/configure': {
+      id: '/workflows_/$workflowId/configure'
+      path: '/workflows/$workflowId/configure'
+      fullPath: '/workflows/$workflowId/configure'
+      preLoaderRoute: typeof WorkflowsWorkflowIdConfigureRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -179,10 +402,21 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthCheckRoute: AuthCheckRoute,
   CallbackRoute: CallbackRoute,
+  ContactTypesRoute: ContactTypesRoute,
+  ContactsRoute: ContactsRoute,
   DashboardRoute: DashboardRoute,
   SigninRoute: SigninRoute,
   TemplatesRoute: TemplatesRoute,
+  UserTypesRoute: UserTypesRoute,
+  UsersRoute: UsersRoute,
+  WorkflowsRoute: WorkflowsRoute,
+  WorkspacesRoute: WorkspacesRoute,
+  DocumentsCreateFromTemplateRoute: DocumentsCreateFromTemplateRoute,
+  DocumentsSendRoute: DocumentsSendRoute,
   TemplatesAddRecipientsRoute: TemplatesAddRecipientsRoute,
+  WorkflowsCreateRoute: WorkflowsCreateRoute,
+  WorkflowsWorkflowIdConfigureRoute: WorkflowsWorkflowIdConfigureRoute,
+  WorkflowsWorkflowIdSuccessRoute: WorkflowsWorkflowIdSuccessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

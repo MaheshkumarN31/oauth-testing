@@ -15,7 +15,8 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from './layout/AppSidebar'
+} from '../layout/AppSidebar'
+import type { Recipient, Workspace } from '@/types'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -30,38 +31,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-export interface Workspace {
-  _id: string
-  name: string
-  type: string
-  status: string
-  user_id: string
-  application_theme: string
-  created_at: Date
-  updated_at: Date
-  plan_type: string
-  is_owner: boolean
-  user_types: Array<UserType>
-}
-
-export interface UserType {
-  user_type_id: string
-  user_type_name: string
-}
-
-interface Recipient {
-  id: string
-  name: string
-  role: 'signer' | 'approver' | 'viewer' | 'cc'
-  email?: string
-}
-
-const roleOptions = [
-  { value: 'signer', label: 'Signer' },
-  { value: 'approver', label: 'Approver' },
-  { value: 'viewer', label: 'Viewer' },
-  { value: 'cc', label: 'CC' },
-]
+import { ROLE_OPTIONS } from '@/types'
+import { useWorkspaces } from '@/hooks/queries'
+import { getContactTypesAPI } from '@/services/api'
 
 const AddTemplateRecipients = () => {
   const searchParams = new URLSearchParams(window.location.search)
@@ -70,41 +42,42 @@ const AddTemplateRecipients = () => {
   const docPathsParam = searchParams.get('doc_paths')
   const docPaths = docPathsParam ? JSON.parse(docPathsParam) : []
 
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
-    null,
-  )
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(() => {
+    const saved = localStorage.getItem('selected_workspace_id')
+    return saved ? { _id: saved, id: saved, name: '' } as Workspace : null
+  })
   const [recipients, setRecipients] = useState<Array<Recipient>>([
     { id: '1', name: 'Sender', role: 'signer' },
   ])
   const [editableTemplateName, setEditableTemplateName] =
     useState(templateNameParam)
 
-  const { data: workspaces, isLoading } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const token = localStorage.getItem('access_token')
-      if (!token) throw new Error('No access token found')
+  const { data: workspaces, isLoading } = useWorkspaces()
 
-      const res = await fetch(
-        `${import.meta.env.VITE_PUBLIC_URL}/api/workspaces/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-
-      if (!res.ok) {
-        throw new Error('Failed to fetch user data')
-      }
-
-      return res.json()
-    },
+  const { data: contactTypes } = useQuery({
+    queryKey: ['contact-types', selectedWorkspace?._id],
+    queryFn: () => getContactTypesAPI({ company_id: selectedWorkspace?._id || '' }),
+    enabled: !!selectedWorkspace?._id
   })
 
+  console.log('DEBUG: contactTypes structure:', contactTypes)
+
   useEffect(() => {
-    if (!selectedWorkspace && workspaces?.data?.[0]) {
-      setSelectedWorkspace(workspaces.data[0])
+    if (workspaces) {
+      const workspaceList = Array.isArray(workspaces) ? workspaces : workspaces.data || []
+
+      const savedId = localStorage.getItem('selected_workspace_id')
+      if (savedId) {
+        const found = workspaceList.find((w: Workspace) => w._id === savedId || w.id === savedId)
+        if (found && found._id !== selectedWorkspace?._id) {
+          setSelectedWorkspace(found)
+          return
+        }
+      }
+
+      if (!selectedWorkspace && workspaceList.length > 0) {
+        setSelectedWorkspace(workspaceList[0])
+      }
     }
   }, [workspaces, selectedWorkspace])
 
@@ -269,9 +242,30 @@ const AddTemplateRecipients = () => {
                           })
                         }
                         placeholder="Recipient name"
-                        className="max-w-[200px] bg-transparent border-0 border-b border-muted-foreground/30 rounded-none focus-visible:ring-0 focus-visible:border-indigo-500 px-0"
+                        className="max-w-[160px] bg-transparent border-0 border-b border-muted-foreground/30 rounded-none focus-visible:ring-0 focus-visible:border-indigo-500 px-0"
                       />
                     </div>
+
+                    <Select
+                      value={recipient.contact_type || 'default'}
+                      onValueChange={(value) =>
+                        updateRecipient(recipient.id, {
+                          contact_type: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Contact Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Default</SelectItem>
+                        {(Array.isArray(contactTypes?.data) ? contactTypes.data : Array.isArray(contactTypes) ? contactTypes : []).map((type: any) => (
+                          <SelectItem key={type.id} value={type.name}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
                     <Select
                       value={recipient.role}
@@ -285,7 +279,7 @@ const AddTemplateRecipients = () => {
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent>
-                        {roleOptions.map((option) => (
+                        {ROLE_OPTIONS.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>
@@ -318,7 +312,7 @@ const AddTemplateRecipients = () => {
           </Card>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarProvider >
   )
 }
 

@@ -1,0 +1,21 @@
+src/components/dashboard.tsx(182,9): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace | null' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace | null'.
+  Property 'id' is missing in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace' but required in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace'.
+src/components/dashboard.tsx(183,9): error TS2322: Type 'Dispatch<SetStateAction<Workspace | null>>' is not assignable to type '(workspace: Workspace) => void'.
+  Types of parameters 'value' and 'workspace' are incompatible.
+    Type 'Workspace' is not assignable to type 'SetStateAction<Workspace | null>'.
+      Type 'Workspace' is missing the following properties from type 'Workspace': application_theme, plan_type, is_owner, user_types
+src/components/layout/AppSidebar.tsx(232,13): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace[]' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace[]'.
+  Type 'Workspace' is missing the following properties from type 'Workspace': application_theme, plan_type, is_owner, user_types
+src/components/layout/AppSidebar.tsx(233,13): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace | null' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace | null'.
+  Type 'Workspace' is missing the following properties from type 'Workspace': application_theme, plan_type, is_owner, user_types
+src/components/layout/AppSidebar.tsx(234,13): error TS2322: Type '(workspace: import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace) => void' is not assignable to type '(workspace: import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace) => void'.
+  Types of parameters 'workspace' and 'workspace' are incompatible.
+    Property 'id' is missing in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/dashboard").Workspace' but required in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace'.
+src/components/templates/templates.tsx(430,9): error TS2322: Type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/templates/templates").Workspace | null' is not assignable to type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace | null'.
+  Property 'id' is missing in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/components/templates/templates").Workspace' but required in type 'import("C:/Users/mahes/Desktop/Actanos/oauth-testing/src/types/index").Workspace'.
+src/components/templates/templates.tsx(431,9): error TS2322: Type 'Dispatch<SetStateAction<Workspace | null>>' is not assignable to type '(workspace: Workspace) => void'.
+  Types of parameters 'value' and 'workspace' are incompatible.
+    Type 'Workspace' is not assignable to type 'SetStateAction<Workspace | null>'.
+      Type 'Workspace' is missing the following properties from type 'Workspace': application_theme, plan_type, is_owner, user_types
+src/hooks/queries/useDocuments.ts(30,40): error TS2554: Expected 1 arguments, but got 3.
+src/hooks/queries/useTemplates.ts(30,40): error TS2554: Expected 1 arguments, but got 3.

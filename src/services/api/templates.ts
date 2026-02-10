@@ -1,0 +1,339 @@
+/* eslint-disable no-useless-catch */
+import { $fetch } from "./fetch";
+
+interface TemplatesPayload {
+  company_id: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  sort_by?: string;
+  sort_order?: "asc" | "desc";
+}
+
+interface Template {
+  id: string;
+  name: string;
+  company_id: string;
+  category?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: any;
+}
+
+interface PresignedUrlResponse {
+  presigned_urls: Array<{
+    filename: string;
+    url: string;
+    file_key: string;
+  }>;
+}
+
+interface UploadProgress {
+  index: number;
+  status: "uploading" | "success" | "error";
+}
+
+/**
+ * Fetch templates for a workspace with pagination
+ */
+export const fetchTemplatesAPI = async (
+  payload: TemplatesPayload
+): Promise<any> => {
+  try {
+    const response = await $fetch.get(
+      "/api/company-document-responses-v2",
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Get all templates for a company
+ * Endpoint: GET /api/templates-v2
+ */
+export const getAllTemplatesAPI = async ({
+  company_id,
+  status = 'ACTIVE',
+  order_by = 'created_at',
+  order_type = 'desc',
+}: {
+  company_id: string;
+  status?: string;
+  order_by?: string;
+  order_type?: 'asc' | 'desc';
+}): Promise<any> => {
+  try {
+    const response = await $fetch.get("/api/templates-v2", {
+      company_id,
+      status,
+      order_by,
+      order_type,
+    });
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Create document from template
+ * Endpoint: POST /api/templates-v2/:template_id/responses
+ */
+export const createDocumentFromTemplateAPI = async ({
+  templateId,
+  payload,
+}: {
+  templateId: string;
+  payload: any;
+}): Promise<any> => {
+  try {
+    const response = await $fetch.post(
+      `/api/templates-v2/${templateId}/responses`,
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Get template by ID
+ */
+export const getTemplateByIdAPI = async ({
+  templateId,
+  queryParams,
+}: {
+  templateId: string;
+  queryParams?: { company_id: string };
+}): Promise<any> => {
+  try {
+    const response = await $fetch.get(
+      `/api/templates-v2/${templateId}`,
+      queryParams || {}
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Send document to recipients
+ * Endpoint: POST /api/templates-v2/:template_id/responses/:response_id/send
+ */
+export const sendDocumentAPI = async ({
+  templateId,
+  responseId,
+  payload,
+}: {
+  templateId: string;
+  responseId: string;
+  payload: {
+    email_subject: string;
+    email_notes: string;
+    email_to: string[];
+    sender_fill_later: boolean;
+    email_cc: string[];
+  };
+}): Promise<any> => {
+  try {
+    const response = await $fetch.post(
+      `/api/templates-v2/${templateId}/responses/${responseId}/send`,
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const deleteTemplateAPI = async ({
+  templateId,
+  payload,
+}: {
+  templateId: string;
+  payload?: { company_id: string };
+}): Promise<any> => {
+  try {
+    const response = await $fetch.delete(
+      `/api/documents-templates/${templateId}`,
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Get presigned URLs for file uploads
+ */
+export const getPresignedUrlsAPI = async (payload: {
+  filenames: Array<string>;
+  company_id: string;
+}): Promise<any> => {
+  try {
+    const response = await $fetch.post(
+      "/api/documents-templates/processed-files",
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Upload a file to S3 using presigned URL
+ */
+export const uploadFileToS3API = async (
+  file: File,
+  presignedUrl: string
+): Promise<boolean> => {
+  try {
+    return await $fetch.uploadToPresignedUrl(presignedUrl, file);
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Upload multiple files and return results
+ */
+export const uploadMultipleFilesAPI = async ({
+  files,
+  uploadUrls,
+  onProgress,
+}: {
+  files: Array<File>;
+  uploadUrls: Array<string>;
+  onProgress?: (progress: UploadProgress) => void;
+}): Promise<Array<{ success: boolean; error?: string }>> => {
+  try {
+    const results = await Promise.all(
+      files.map(async (file, index) => {
+        onProgress?.({ index, status: "uploading" });
+        try {
+          await uploadFileToS3API(file, uploadUrls[index]);
+          onProgress?.({ index, status: "success" });
+          return { success: true };
+        } catch (error) {
+          onProgress?.({ index, status: "error" });
+          return { success: false, error: (error as Error).message };
+        }
+      })
+    );
+    return results;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Get template categories
+ */
+export const getTemplateCategoriesAPI = async (queryParams?: {
+  company_id?: string;
+}): Promise<any> => {
+  try {
+    const response = await $fetch.get(
+      "/api/documents-templates/categories",
+      queryParams || {}
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Bulk delete templates
+ */
+export const bulkDeleteTemplatesAPI = async ({
+  template_ids,
+  company_id,
+}: {
+  template_ids: Array<string>;
+  company_id: string;
+}): Promise<any> => {
+  try {
+    const response = await $fetch.delete(
+      "/api/documents-templates/bulk-delete",
+      { template_ids, company_id }
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Duplicate template
+ */
+export const duplicateTemplateAPI = async ({
+  templateId,
+  payload,
+}: {
+  templateId: string;
+  payload?: { company_id: string; name?: string };
+}): Promise<any> => {
+  try {
+    const response = await $fetch.post(
+      `/api/documents-templates/${templateId}/duplicate`,
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+
+export const updateTemplateAPI = async ({
+  templateId,
+  payload,
+}: {
+  templateId: string;
+  payload: {
+    title?: string;
+    document_users?: Array<any>;
+    [key: string]: any;
+  };
+}): Promise<any> => {
+  try {
+    const response = await $fetch.put(
+      `/api/templates-v2/${templateId}/document-users`,
+      payload
+    );
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+// ALSO UPDATE createTemplateAPI TO USE THE CORRECT ENDPOINT
+/**
+ * Create new template (UPDATED)
+ */
+export const createTemplateAPI = async (payload: {
+  title: string;
+  company_id: string;
+  user_id: string;
+  paths: Array<string>;
+  files_state: string;
+  document_names: Array<string>;
+  is_template: boolean;
+  [key: string]: any;
+}): Promise<any> => {
+  try {
+    const response = await $fetch.post("/api/company-documents-v2", payload);
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};

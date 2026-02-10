@@ -1,4 +1,3 @@
-// DocsColumns.ts
 import { CheckCircle2, Clock, Edit, FileText, Send } from 'lucide-react'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'

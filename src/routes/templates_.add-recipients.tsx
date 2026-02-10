@@ -1,6 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
-import AddTemplateRecipients from '@/components/addTemplateRecipients'
+import { MainLayout } from '@/components/layout/MainLayout'
+import { AddRecipientsContent } from '@/components/features/templates'
 
 export const Route = createFileRoute('/templates_/add-recipients')({
-  component: AddTemplateRecipients,
+  component: AddRecipientsPage,
 })
+
+function AddRecipientsPage() {
+  return (
+    <MainLayout>
+      {({ selectedWorkspace }) => (
+        <AddRecipientsContent selectedWorkspace={selectedWorkspace} />
+      )}
+    </MainLayout>
+  )
+}

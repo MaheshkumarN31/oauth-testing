@@ -64,7 +64,6 @@ export default function TanStackTable({
     getPaginationRowModel: getPaginationRowModel(),
   })
 
-  // Loading skeleton rows
   const renderLoadingRows = () => {
     return Array.from({ length: 5 }).map((_, index) => (
       <tr key={index} className="animate-pulse">
@@ -80,7 +79,6 @@ export default function TanStackTable({
     ))
   }
 
-  // Empty state
   const renderEmptyState = () => (
     <tr>
       <td colSpan={columns.length + 1} className="text-center py-16">
@@ -103,7 +101,6 @@ export default function TanStackTable({
 
   return (
     <div className="flex flex-col">
-      {/* Table Container */}
       <div className={`overflow-auto max-h-[calc(100vh-460px)]`}>
         <table className="min-w-full">
           <thead className="sticky top-0 z-10">
@@ -112,7 +109,6 @@ export default function TanStackTable({
                 key={headerGroup.id}
                 className="bg-muted/50 border-y border-border"
               >
-                {/* S.No header */}
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-16">
                   #
                 </th>
@@ -160,9 +156,7 @@ export default function TanStackTable({
         </table>
       </div>
 
-      {/* Footer with Pagination */}
       <div className="border-t bg-muted/30 px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-        {/* Total Count Info */}
         <div className="text-sm text-muted-foreground order-3 md:order-1">
           Showing{' '}
           <span className="font-medium text-foreground">
@@ -176,7 +170,6 @@ export default function TanStackTable({
           results
         </div>
 
-        {/* Pagination Controls */}
         <div className="flex items-center gap-2 order-1 md:order-2">
           <Button
             variant="outline"
@@ -208,9 +201,7 @@ export default function TanStackTable({
           </Button>
         </div>
 
-        {/* Rows per page & Go to page */}
         <div className="flex items-center gap-4 order-2 md:order-3">
-          {/* Go to page */}
           <div className="flex items-center gap-2">
             <Input
               type="number"
@@ -240,7 +231,6 @@ export default function TanStackTable({
             </Button>
           </div>
 
-          {/* Rows per page */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground hidden sm:inline">
               Rows:
