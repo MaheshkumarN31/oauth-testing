@@ -207,12 +207,7 @@ export function AppSidebar({
       href: `/workflows?user_id=${userId}`,
       path: '/workflows',
     },
-    {
-      title: 'Documents',
-      icon: Briefcase,
-      href: `/documents?user_id=${userId}`,
-      path: '/documents',
-    },
+
     {
       title: 'Contacts',
       icon: Users,
@@ -242,12 +237,6 @@ export function AppSidebar({
       icon: Briefcase,
       href: `/workspaces?user_id=${userId}`,
       path: '/workspaces',
-    },
-    {
-      title: 'Analytics',
-      icon: BarChart3,
-      href: '#',
-      path: '/analytics',
     },
   ]
 
