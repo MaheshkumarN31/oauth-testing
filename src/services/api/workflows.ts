@@ -65,3 +65,22 @@ export const createWorkflowResponseAPI = async ({
     throw err
   }
 }
+
+/**
+ * Send a workflow response
+ * POST /api/workflows/:workflow_id/responses/:id/send
+ */
+export const sendWorkflowResponseAPI = async ({
+  workflowId,
+  responseId,
+}: {
+  workflowId: string
+  responseId: string
+}): Promise<any> => {
+  try {
+    const response = await $fetch.post(`/api/workflows/${workflowId}/responses/${responseId}/send`)
+    return response
+  } catch (err) {
+    throw err
+  }
+}

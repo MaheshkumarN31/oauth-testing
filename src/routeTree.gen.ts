@@ -25,6 +25,7 @@ import { Route as WorkflowsCreateRouteImport } from './routes/workflows_.create'
 import { Route as TemplatesAddRecipientsRouteImport } from './routes/templates_.add-recipients'
 import { Route as DocumentsSendRouteImport } from './routes/documents_.send'
 import { Route as DocumentsCreateFromTemplateRouteImport } from './routes/documents_.create-from-template'
+import { Route as WorkflowsWorkflowIdSuccessRouteImport } from './routes/workflows_.$workflowId.success'
 import { Route as WorkflowsWorkflowIdConfigureRouteImport } from './routes/workflows_.$workflowId.configure'
 
 const WorkspacesRoute = WorkspacesRouteImport.update({
@@ -108,6 +109,12 @@ const DocumentsCreateFromTemplateRoute =
     path: '/documents/create-from-template',
     getParentRoute: () => rootRouteImport,
   } as any)
+const WorkflowsWorkflowIdSuccessRoute =
+  WorkflowsWorkflowIdSuccessRouteImport.update({
+    id: '/workflows_/$workflowId/success',
+    path: '/workflows/$workflowId/success',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const WorkflowsWorkflowIdConfigureRoute =
   WorkflowsWorkflowIdConfigureRouteImport.update({
     id: '/workflows_/$workflowId/configure',
@@ -133,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
   '/workflows/create': typeof WorkflowsCreateRoute
   '/workflows/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
+  '/workflows/$workflowId/success': typeof WorkflowsWorkflowIdSuccessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -152,6 +160,7 @@ export interface FileRoutesByTo {
   '/templates/add-recipients': typeof TemplatesAddRecipientsRoute
   '/workflows/create': typeof WorkflowsCreateRoute
   '/workflows/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
+  '/workflows/$workflowId/success': typeof WorkflowsWorkflowIdSuccessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -172,6 +181,7 @@ export interface FileRoutesById {
   '/templates_/add-recipients': typeof TemplatesAddRecipientsRoute
   '/workflows_/create': typeof WorkflowsCreateRoute
   '/workflows_/$workflowId/configure': typeof WorkflowsWorkflowIdConfigureRoute
+  '/workflows_/$workflowId/success': typeof WorkflowsWorkflowIdSuccessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/templates/add-recipients'
     | '/workflows/create'
     | '/workflows/$workflowId/configure'
+    | '/workflows/$workflowId/success'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/templates/add-recipients'
     | '/workflows/create'
     | '/workflows/$workflowId/configure'
+    | '/workflows/$workflowId/success'
   id:
     | '__root__'
     | '/'
@@ -231,6 +243,7 @@ export interface FileRouteTypes {
     | '/templates_/add-recipients'
     | '/workflows_/create'
     | '/workflows_/$workflowId/configure'
+    | '/workflows_/$workflowId/success'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -251,6 +264,7 @@ export interface RootRouteChildren {
   TemplatesAddRecipientsRoute: typeof TemplatesAddRecipientsRoute
   WorkflowsCreateRoute: typeof WorkflowsCreateRoute
   WorkflowsWorkflowIdConfigureRoute: typeof WorkflowsWorkflowIdConfigureRoute
+  WorkflowsWorkflowIdSuccessRoute: typeof WorkflowsWorkflowIdSuccessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -367,6 +381,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocumentsCreateFromTemplateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workflows_/$workflowId/success': {
+      id: '/workflows_/$workflowId/success'
+      path: '/workflows/$workflowId/success'
+      fullPath: '/workflows/$workflowId/success'
+      preLoaderRoute: typeof WorkflowsWorkflowIdSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/workflows_/$workflowId/configure': {
       id: '/workflows_/$workflowId/configure'
       path: '/workflows/$workflowId/configure'
@@ -395,6 +416,7 @@ const rootRouteChildren: RootRouteChildren = {
   TemplatesAddRecipientsRoute: TemplatesAddRecipientsRoute,
   WorkflowsCreateRoute: WorkflowsCreateRoute,
   WorkflowsWorkflowIdConfigureRoute: WorkflowsWorkflowIdConfigureRoute,
+  WorkflowsWorkflowIdSuccessRoute: WorkflowsWorkflowIdSuccessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

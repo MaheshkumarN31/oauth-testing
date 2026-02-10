@@ -1,3 +1,4 @@
 export * from './WorkflowsContent'
 export * from './CreateWorkflowContent'
 export * from './WorkflowConfigureContent'
+export * from './WorkflowSuccessContent'

@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useWorkflow, useContacts } from '@/hooks/queries'
 import { getTemplateByIdAPI } from '@/services/api/templates'
-import { createWorkflowResponseAPI } from '@/services/api/workflows'
+import { createWorkflowResponseAPI, sendWorkflowResponseAPI } from '@/services/api/workflows'
 import type { Workspace } from '@/types'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -451,12 +451,6 @@ const handleContinue = async () => {
             // Filter out users that have no valid templates
             .filter(u => u.templates.length > 0)
 
-        console.log("Document templates:", documentTemplates)
-        console.log("Workflow users with templates:")
-        workflowUsers.forEach(user => {
-            console.log(`- ${user.role}: ${user.templates.length} templates`, user.templates)
-        })
-
         const primaryUser = workflowUsers.length > 0 ? workflowUsers[0] : null
 
         const payload = {
@@ -467,26 +461,48 @@ const handleContinue = async () => {
             enforce_signature_order: enforceOrder
         }
 
-        console.log("Creating workflow response with payload:")
-        console.log(JSON.stringify(payload, null, 2))
-
-        await createWorkflowResponseAPI({
+        // Step 1: Create workflow response
+        const createRes = await createWorkflowResponseAPI({
             workflowId: workflowId as string,
             payload
         })
 
-        toast.dismiss()
-        toast.success('Workflow response created successfully!')
+        // Extract the response ID from the created response
+        const responseData = createRes?.data?.data || createRes?.data || createRes
+        const responseId = responseData?._id || responseData?.id
 
-        // Navigate back to workflows list
-        navigate({ to: '/workflows', search: { user_id: localStorage.getItem('user_id') || '' } })
+        if (!responseId) {
+            throw new Error('Failed to get workflow response ID')
+        }
+
+        // Step 2: Send the workflow response
+        toast.dismiss()
+        toast.loading('Sending workflow...')
+
+        await sendWorkflowResponseAPI({
+            workflowId: workflowId as string,
+            responseId
+        })
+
+        toast.dismiss()
+        toast.success('Workflow sent successfully!')
+
+        // Navigate to success page
+        navigate({
+            to: '/workflows/$workflowId/success',
+            params: { workflowId },
+            search: {
+                user_id: localStorage.getItem('user_id') || '',
+                workflow_name: workflowData?.name || ''
+            }
+        })
 
     } catch (error: any) {
         console.error("Failed to create workflow response:", error)
         console.error("Error response:", error?.response?.data)
         toast.dismiss()
 
-        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create workflow response'
+        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to send workflow'
         toast.error(errorMessage)
     } finally {
         setIsSubmitting(false)
@@ -547,11 +563,11 @@ const handleContinue = async () => {
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processing...
+                                Sending...
                             </>
                         ) : (
                             <>
-                                Continue <ChevronRight className="ml-2 h-4 w-4" />
+                                Send Workflow <ChevronRight className="ml-2 h-4 w-4" />
                             </>
                         )}
                     </Button>
