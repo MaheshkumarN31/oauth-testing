@@ -7,7 +7,7 @@ export const Route = createFileRoute('/signin')({
 })
 
 function SignIn() {
-  const { isLoading, isError, refetch } = useQuery({
+  const { isLoading, refetch } = useQuery({
     queryKey: ['getOauthUrl'],
     queryFn: initiateOAuthLogin,
     enabled: false,

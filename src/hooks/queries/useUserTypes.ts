@@ -4,7 +4,6 @@ import {
     createUserTypeAPI,
     updateUserTypeAPI,
     deleteUserTypeAPI,
-    type UserType,
     type UserTypesPayload,
     type CreateUserTypePayload,
     type UpdateUserTypePayload,

@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   Briefcase,
   Building2,
   Check,

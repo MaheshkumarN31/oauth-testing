@@ -19,7 +19,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface CreateDocumentFromTemplateProps {
     selectedWorkspace: Workspace | null

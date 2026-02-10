@@ -278,7 +278,7 @@ export function AddRecipientsContent({
           // NON-SENDER (RECEIVER) payload structure - matches API reference exactly
           // Find contact type by matching the recipient's name
           const contactType = contactTypes.find(
-            (ct) => ct.name.toLowerCase() === recipient.name.toLowerCase(),
+            (ct:any) => ct.name.toLowerCase() === recipient.name.toLowerCase(),
           )
 
           const contactTypeName = contactType?.name || recipient.name
@@ -542,7 +542,7 @@ export function AddRecipientsContent({
                         </div>
                       ) : (
                         <div className="space-y-1">
-                          {contactTypes.map((contactType) => (
+                          {contactTypes.map((contactType:any) => (
                             <button
                               key={contactType._id}
                               onClick={() =>

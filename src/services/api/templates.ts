@@ -11,23 +11,6 @@ interface TemplatesPayload {
   sort_order?: "asc" | "desc";
 }
 
-interface Template {
-  id: string;
-  name: string;
-  company_id: string;
-  category?: string;
-  created_at?: string;
-  updated_at?: string;
-  [key: string]: any;
-}
-
-interface PresignedUrlResponse {
-  presigned_urls: Array<{
-    filename: string;
-    url: string;
-    file_key: string;
-  }>;
-}
 
 interface UploadProgress {
   index: number;

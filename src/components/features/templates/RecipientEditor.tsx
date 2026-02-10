@@ -1,15 +1,8 @@
 import { ChevronDown, ChevronUp, Plus, Trash2, User } from 'lucide-react'
-import type { Recipient, RecipientRole } from '@/types'
+import type { Recipient} from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { ROLE_OPTIONS } from '@/types'
+
 
 interface RecipientEditorProps {
   recipients: Array<Recipient>
